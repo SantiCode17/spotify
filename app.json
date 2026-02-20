@@ -1,12 +1,12 @@
 {
   "expo": {
-    "name": "spotify",
-    "slug": "spotify",
+    "name": "Spotify",
+    "slug": "spotify-app",
     "version": "1.0.0",
-    "scheme": "spotifyapp",
+    "scheme": "spotify-app",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash-icon.png",

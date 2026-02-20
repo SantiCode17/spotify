@@ -1,8 +1,20 @@
 import { Redirect } from 'expo-router';
+import { useAuthStore } from '../src/store/authStore';
+import LoadingSpinner from '../src/components/ui/LoadingSpinner';
 
 const Index = () => {
-  // En Fase 3 aquí irá: si hay sesión → tabs, si no → login
-  return <Redirect href="/(tabs)/home" />;
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const isLoading = useAuthStore((s) => s.isLoading);
+
+  if (isLoading) {
+    return <LoadingSpinner message="Verificando sesión..." />;
+  }
+
+  if (isAuthenticated) {
+    return <Redirect href="/(app)/(tabs)" />;
+  }
+
+  return <Redirect href="/(auth)/login" />;
 };
 
 export default Index;

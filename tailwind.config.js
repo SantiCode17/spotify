@@ -1,28 +1,29 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "./App.tsx",
     "./app/**/*.{js,jsx,ts,tsx}",
-    "./components/**/*.{js,jsx,ts,tsx}",
-    "./presentation/**/*.{js,jsx,ts,tsx}",
-    "./core/**/*.{js,jsx,ts,tsx}",
-    "./infrastructure/**/*.{js,jsx,ts,tsx}",
+    "./src/**/*.{js,jsx,ts,tsx}",
   ],
   presets: [require("nativewind/preset")],
   theme: {
     extend: {
       colors: {
-        spotify: {
-          black: '#121212',
-          darkgray: '#1E1E1E',
-          card: '#282828',
-          green: '#1DB954',
-          'green-hover': '#1ed760',
-          white: '#FFFFFF',
-          'text-secondary': '#B3B3B3',
-          'text-tertiary': '#535353',
-        }
-      }
+        'spotify-black': '#121212',
+        'spotify-dark': '#181818',
+        'spotify-darker': '#282828',
+        'spotify-green': '#1DB954',
+        'spotify-green-dark': '#1aa34a',
+        'spotify-white': '#FFFFFF',
+        'spotify-gray': '#B3B3B3',
+        'spotify-light-gray': '#535353',
+        'spotify-purple': '#7B2FBE',
+      },
+      fontFamily: {
+        inter: ['Inter'],
+        'inter-medium': ['Inter_500Medium'],
+        'inter-semibold': ['Inter_600SemiBold'],
+        'inter-bold': ['Inter_700Bold'],
+      },
     },
   },
   plugins: [],
