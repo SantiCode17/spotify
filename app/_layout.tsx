@@ -11,7 +11,24 @@ const RootLayout = () => {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
-          <Stack screenOptions={{ headerShown: false }} />
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="index" />
+            <Stack.Screen name="(auth)" />
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="(drawer)" />
+            <Stack.Screen name="playlist/[id]" />
+            <Stack.Screen name="album/[id]" />
+            <Stack.Screen name="artist/[id]" />
+            <Stack.Screen name="podcast/[id]" />
+            <Stack.Screen name="episode/[id]" />
+            <Stack.Screen
+              name="modal/add-playlist"
+              options={{
+                presentation: 'modal',
+                animation: 'slide_from_bottom',
+              }}
+            />
+          </Stack>
         </QueryClientProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
