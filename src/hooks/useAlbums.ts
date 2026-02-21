@@ -1,47 +1,61 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuthStore } from '../store/authStore';
+import { queryKeys } from '../config/queryKeys';
 import * as albumService from '../services/albumService';
 
-/** Hook para álbumes seguidos */
-export const useAlbumsSeguidos = () => {
-  const userId = useAuthStore((s) => s.userId);
+/** Álbumes seguidos por el usuario */
+export const useFollowedAlbums = (userId: number | null) => {
   return useQuery({
-    queryKey: ['albums', 'seguidos', userId],
-    queryFn: () => albumService.getAlbumsSeguidos(userId!),
+    queryKey: queryKeys.followedAlbums(userId!),
+    queryFn: () => albumService.getFollowedAlbums(userId!),
     enabled: !!userId,
   });
 };
 
-/** Hook para detalle de álbum */
-export const useAlbum = (albumId: number) => {
+/** Detalle de un álbum */
+export const useAlbumDetail = (albumId: number) => {
   return useQuery({
-    queryKey: ['album', albumId],
-    queryFn: () => albumService.getAlbum(albumId),
+    queryKey: queryKeys.albumDetail(albumId),
+    queryFn: () => albumService.getAlbumDetail(albumId),
     enabled: !!albumId,
   });
 };
 
-/** Hook para canciones de un álbum */
-export const useCancionesAlbum = (albumId: number) => {
+/** Canciones de un álbum */
+export const useAlbumSongs = (albumId: number) => {
   return useQuery({
-    queryKey: ['album', albumId, 'canciones'],
-    queryFn: () => albumService.getCancionesAlbum(albumId),
+    queryKey: queryKeys.albumSongs(albumId),
+    queryFn: () => albumService.getAlbumSongs(albumId),
     enabled: !!albumId,
   });
 };
 
-/** Mutación para seguir/dejar de seguir álbum */
-export const useSeguirAlbum = () => {
+/** Todos los álbumes */
+export const useAllAlbums = () => {
+  return useQuery({
+    queryKey: queryKeys.allAlbums(),
+    queryFn: () => albumService.getAllAlbums(),
+  });
+};
+
+/** Seguir álbum */
+export const useFollowAlbum = (userId: number | null) => {
   const queryClient = useQueryClient();
-  const userId = useAuthStore((s) => s.userId);
-
   return useMutation({
-    mutationFn: ({ albumId, seguir }: { albumId: number; seguir: boolean }) =>
-      seguir
-        ? albumService.seguirAlbum(userId!, albumId)
-        : albumService.dejarDeSeguirAlbum(userId!, albumId),
+    mutationFn: (albumId: number) => albumService.followAlbum(userId!, albumId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['albums', 'seguidos'] });
+      if (userId) queryClient.invalidateQueries({ queryKey: queryKeys.followedAlbums(userId) });
     },
   });
 };
+
+/** Dejar de seguir álbum */
+export const useUnfollowAlbum = (userId: number | null) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (albumId: number) => albumService.unfollowAlbum(userId!, albumId),
+    onSuccess: () => {
+      if (userId) queryClient.invalidateQueries({ queryKey: queryKeys.followedAlbums(userId) });
+    },
+  });
+};
+

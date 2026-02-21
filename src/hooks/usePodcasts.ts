@@ -1,56 +1,70 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuthStore } from '../store/authStore';
+import { queryKeys } from '../config/queryKeys';
 import * as podcastService from '../services/podcastService';
 
-/** Hook para podcasts seguidos */
-export const usePodcastsSeguidos = () => {
-  const userId = useAuthStore((s) => s.userId);
+/** Podcasts seguidos por el usuario */
+export const useFollowedPodcasts = (userId: number | null) => {
   return useQuery({
-    queryKey: ['podcasts', 'seguidos', userId],
-    queryFn: () => podcastService.getPodcastsSeguidos(userId!),
+    queryKey: queryKeys.followedPodcasts(userId!),
+    queryFn: () => podcastService.getFollowedPodcasts(userId!),
     enabled: !!userId,
   });
 };
 
-/** Hook para detalle de podcast */
-export const usePodcast = (podcastId: number) => {
+/** Detalle de un podcast */
+export const usePodcastDetail = (podcastId: number) => {
   return useQuery({
-    queryKey: ['podcast', podcastId],
-    queryFn: () => podcastService.getPodcast(podcastId),
+    queryKey: queryKeys.podcastDetail(podcastId),
+    queryFn: () => podcastService.getPodcastDetail(podcastId),
     enabled: !!podcastId,
   });
 };
 
-/** Hook para capítulos de un podcast */
-export const useCapitulosPodcast = (podcastId: number) => {
+/** Capítulos/episodios de un podcast */
+export const usePodcastEpisodes = (podcastId: number) => {
   return useQuery({
-    queryKey: ['podcast', podcastId, 'capitulos'],
-    queryFn: () => podcastService.getCapitulosPodcast(podcastId),
+    queryKey: queryKeys.podcastEpisodes(podcastId),
+    queryFn: () => podcastService.getPodcastEpisodes(podcastId),
     enabled: !!podcastId,
   });
 };
 
-/** Hook para detalle de capítulo */
-export const useCapitulo = (capituloId: number) => {
+/** Detalle de un episodio/capítulo */
+export const useEpisodeDetail = (episodeId: number) => {
   return useQuery({
-    queryKey: ['capitulo', capituloId],
-    queryFn: () => podcastService.getCapitulo(capituloId),
-    enabled: !!capituloId,
+    queryKey: queryKeys.episodeDetail(episodeId),
+    queryFn: () => podcastService.getEpisodeDetail(episodeId),
+    enabled: !!episodeId,
   });
 };
 
-/** Mutación para seguir/dejar de seguir podcast */
-export const useSeguirPodcast = () => {
+/** Todos los podcasts */
+export const useAllPodcasts = () => {
+  return useQuery({
+    queryKey: queryKeys.allPodcasts(),
+    queryFn: () => podcastService.getAllPodcasts(),
+  });
+};
+
+/** Seguir podcast */
+export const useFollowPodcast = (userId: number | null) => {
   const queryClient = useQueryClient();
-  const userId = useAuthStore((s) => s.userId);
-
   return useMutation({
-    mutationFn: ({ podcastId, seguir }: { podcastId: number; seguir: boolean }) =>
-      seguir
-        ? podcastService.seguirPodcast(userId!, podcastId)
-        : podcastService.dejarDeSeguirPodcast(userId!, podcastId),
+    mutationFn: (podcastId: number) => podcastService.followPodcast(userId!, podcastId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['podcasts', 'seguidos'] });
+      if (userId) queryClient.invalidateQueries({ queryKey: queryKeys.followedPodcasts(userId) });
     },
   });
 };
+
+/** Dejar de seguir podcast */
+export const useUnfollowPodcast = (userId: number | null) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (podcastId: number) => podcastService.unfollowPodcast(userId!, podcastId),
+    onSuccess: () => {
+      if (userId) queryClient.invalidateQueries({ queryKey: queryKeys.followedPodcasts(userId) });
+    },
+  });
+};
+

@@ -10,10 +10,13 @@ import { useAuthStore } from '../src/store/authStore';
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000,  // 5 minutos
-      gcTime: 10 * 60 * 1000,    // 10 minutos
+      staleTime: 1000 * 60 * 5,   // 5 minutos
+      gcTime: 1000 * 60 * 10,     // 10 minutos
       retry: 2,
       refetchOnWindowFocus: false,
+    },
+    mutations: {
+      retry: 0,
     },
   },
 });

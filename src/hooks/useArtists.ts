@@ -1,56 +1,70 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuthStore } from '../store/authStore';
+import { queryKeys } from '../config/queryKeys';
 import * as artistService from '../services/artistService';
 
-/** Hook para artistas seguidos */
-export const useArtistasSeguidos = () => {
-  const userId = useAuthStore((s) => s.userId);
+/** Artistas seguidos por el usuario */
+export const useFollowedArtists = (userId: number | null) => {
   return useQuery({
-    queryKey: ['artistas', 'seguidos', userId],
-    queryFn: () => artistService.getArtistasSeguidos(userId!),
+    queryKey: queryKeys.followedArtists(userId!),
+    queryFn: () => artistService.getFollowedArtists(userId!),
     enabled: !!userId,
   });
 };
 
-/** Hook para detalle de artista */
-export const useArtista = (artistaId: number) => {
+/** Detalle de un artista */
+export const useArtistDetail = (artistId: number) => {
   return useQuery({
-    queryKey: ['artista', artistaId],
-    queryFn: () => artistService.getArtista(artistaId),
-    enabled: !!artistaId,
+    queryKey: queryKeys.artistDetail(artistId),
+    queryFn: () => artistService.getArtistDetail(artistId),
+    enabled: !!artistId,
   });
 };
 
-/** Hook para álbumes de un artista */
-export const useAlbumsArtista = (artistaId: number) => {
+/** Álbumes de un artista */
+export const useArtistAlbums = (artistId: number) => {
   return useQuery({
-    queryKey: ['artista', artistaId, 'albums'],
-    queryFn: () => artistService.getAlbumsArtista(artistaId),
-    enabled: !!artistaId,
+    queryKey: queryKeys.artistAlbums(artistId),
+    queryFn: () => artistService.getArtistAlbums(artistId),
+    enabled: !!artistId,
   });
 };
 
-/** Hook para canciones de un artista */
-export const useCancionesArtista = (artistaId: number) => {
+/** Canciones de un artista */
+export const useArtistSongs = (artistId: number) => {
   return useQuery({
-    queryKey: ['artista', artistaId, 'canciones'],
-    queryFn: () => artistService.getCancionesArtista(artistaId),
-    enabled: !!artistaId,
+    queryKey: queryKeys.artistSongs(artistId),
+    queryFn: () => artistService.getArtistSongs(artistId),
+    enabled: !!artistId,
   });
 };
 
-/** Mutación para seguir/dejar de seguir artista */
-export const useSeguirArtista = () => {
+/** Todos los artistas */
+export const useAllArtists = () => {
+  return useQuery({
+    queryKey: queryKeys.allArtists(),
+    queryFn: () => artistService.getAllArtists(),
+  });
+};
+
+/** Seguir artista */
+export const useFollowArtist = (userId: number | null) => {
   const queryClient = useQueryClient();
-  const userId = useAuthStore((s) => s.userId);
-
   return useMutation({
-    mutationFn: ({ artistaId, seguir }: { artistaId: number; seguir: boolean }) =>
-      seguir
-        ? artistService.seguirArtista(userId!, artistaId)
-        : artistService.dejarDeSeguirArtista(userId!, artistaId),
+    mutationFn: (artistId: number) => artistService.followArtist(userId!, artistId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['artistas', 'seguidos'] });
+      if (userId) queryClient.invalidateQueries({ queryKey: queryKeys.followedArtists(userId) });
     },
   });
 };
+
+/** Dejar de seguir artista */
+export const useUnfollowArtist = (userId: number | null) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (artistId: number) => artistService.unfollowArtist(userId!, artistId),
+    onSuccess: () => {
+      if (userId) queryClient.invalidateQueries({ queryKey: queryKeys.followedArtists(userId) });
+    },
+  });
+};
+

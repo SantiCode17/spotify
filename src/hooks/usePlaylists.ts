@@ -1,96 +1,105 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuthStore } from '../store/authStore';
+import { queryKeys } from '../config/queryKeys';
 import * as playlistService from '../services/playlistService';
 
-/** Hook para playlists propias del usuario */
-export const usePlaylistsUsuario = () => {
-  const userId = useAuthStore((s) => s.userId);
+/** Playlists propias del usuario */
+export const useUserPlaylists = (userId: number | null) => {
   return useQuery({
-    queryKey: ['playlists', 'propias', userId],
-    queryFn: () => playlistService.getPlaylistsUsuario(userId!),
+    queryKey: queryKeys.userPlaylists(userId!),
+    queryFn: () => playlistService.getUserPlaylists(userId!),
     enabled: !!userId,
   });
 };
 
-/** Hook para playlists seguidas */
-export const usePlaylistsSeguidas = () => {
-  const userId = useAuthStore((s) => s.userId);
+/** Playlists seguidas por el usuario */
+export const useFollowedPlaylists = (userId: number | null) => {
   return useQuery({
-    queryKey: ['playlists', 'seguidas', userId],
-    queryFn: () => playlistService.getPlaylistsSeguidas(userId!),
+    queryKey: queryKeys.followedPlaylists(userId!),
+    queryFn: () => playlistService.getFollowedPlaylists(userId!),
     enabled: !!userId,
   });
 };
 
-/** Hook para detalle de playlist */
-export const usePlaylist = (playlistId: number) => {
+/** Detalle de una playlist */
+export const usePlaylistDetail = (playlistId: number) => {
   return useQuery({
-    queryKey: ['playlist', playlistId],
-    queryFn: () => playlistService.getPlaylist(playlistId),
+    queryKey: queryKeys.playlistDetail(playlistId),
+    queryFn: () => playlistService.getPlaylistDetail(playlistId),
     enabled: !!playlistId,
   });
 };
 
-/** Hook para canciones de playlist */
-export const useCancionesPlaylist = (playlistId: number) => {
+/** Canciones de una playlist */
+export const usePlaylistSongs = (playlistId: number) => {
   return useQuery({
-    queryKey: ['playlist', playlistId, 'canciones'],
-    queryFn: () => playlistService.getCancionesPlaylist(playlistId),
+    queryKey: queryKeys.playlistSongs(playlistId),
+    queryFn: () => playlistService.getPlaylistSongs(playlistId),
     enabled: !!playlistId,
   });
 };
 
-/** Mutación para crear playlist */
-export const useCreatePlaylist = () => {
+/** Todas las playlists públicas */
+export const usePublicPlaylists = () => {
+  return useQuery({
+    queryKey: queryKeys.publicPlaylists(),
+    queryFn: () => playlistService.getPublicPlaylists(),
+  });
+};
+
+/** Crear nueva playlist */
+export const useCreatePlaylist = (userId: number | null) => {
   const queryClient = useQueryClient();
-  const userId = useAuthStore((s) => s.userId);
-
   return useMutation({
     mutationFn: (titulo: string) => playlistService.createPlaylist(userId!, titulo),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['playlists'] });
+      if (userId) queryClient.invalidateQueries({ queryKey: queryKeys.userPlaylists(userId) });
     },
   });
 };
 
-/** Mutación para seguir/dejar de seguir playlist */
-export const useSeguirPlaylist = () => {
+/** Añadir canción a playlist */
+export const useAddSongToPlaylist = (playlistId: number) => {
   const queryClient = useQueryClient();
-  const userId = useAuthStore((s) => s.userId);
-
   return useMutation({
-    mutationFn: ({ playlistId, seguir }: { playlistId: number; seguir: boolean }) =>
-      seguir
-        ? playlistService.seguirPlaylist(userId!, playlistId)
-        : playlistService.dejarDeSeguirPlaylist(userId!, playlistId),
+    mutationFn: ({ cancionId, usuarioId }: { cancionId: number; usuarioId: number }) =>
+      playlistService.addSongToPlaylist(playlistId, cancionId, usuarioId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['playlists', 'seguidas'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.playlistSongs(playlistId) });
     },
   });
 };
 
-/** Mutación para añadir canción a playlist */
-export const useAddCancionToPlaylist = () => {
+/** Quitar canción de playlist */
+export const useRemoveSongFromPlaylist = (playlistId: number) => {
   const queryClient = useQueryClient();
-
   return useMutation({
-    mutationFn: ({ playlistId, cancionId }: { playlistId: number; cancionId: number }) =>
-      playlistService.addCancionToPlaylist(playlistId, cancionId),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['playlist', variables.playlistId, 'canciones'] });
+    mutationFn: (cancionId: number) =>
+      playlistService.removeSongFromPlaylist(playlistId, cancionId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.playlistSongs(playlistId) });
     },
   });
 };
 
-/** Mutación para quitar canción de playlist */
-export const useRemoveCancionFromPlaylist = () => {
+/** Seguir playlist */
+export const useFollowPlaylist = (userId: number | null) => {
   const queryClient = useQueryClient();
-
   return useMutation({
-    mutationFn: ({ playlistId, cancionId }: { playlistId: number; cancionId: number }) =>
-      playlistService.removeCancionFromPlaylist(playlistId, cancionId),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['playlist', variables.playlistId, 'canciones'] });
+    mutationFn: (playlistId: number) => playlistService.followPlaylist(userId!, playlistId),
+    onSuccess: () => {
+      if (userId) queryClient.invalidateQueries({ queryKey: queryKeys.followedPlaylists(userId) });
     },
   });
 };
+
+/** Dejar de seguir playlist */
+export const useUnfollowPlaylist = (userId: number | null) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (playlistId: number) => playlistService.unfollowPlaylist(userId!, playlistId),
+    onSuccess: () => {
+      if (userId) queryClient.invalidateQueries({ queryKey: queryKeys.followedPlaylists(userId) });
+    },
+  });
+};
+

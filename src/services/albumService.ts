@@ -8,29 +8,30 @@ export const getAllAlbums = async (): Promise<Album[]> => {
 };
 
 /** Obtener detalle de un álbum */
-export const getAlbum = async (albumId: number): Promise<Album> => {
+export const getAlbumDetail = async (albumId: number): Promise<Album> => {
   const response = await apiClient.get(`/albums/${albumId}`);
   return response.data;
 };
 
 /** Obtener canciones de un álbum */
-export const getCancionesAlbum = async (albumId: number): Promise<Cancion[]> => {
+export const getAlbumSongs = async (albumId: number): Promise<Cancion[]> => {
   const response = await apiClient.get(`/albums/${albumId}/canciones`);
   return response.data;
 };
 
 /** Obtener álbumes seguidos por el usuario */
-export const getAlbumsSeguidos = async (userId: number): Promise<Album[]> => {
+export const getFollowedAlbums = async (userId: number): Promise<Album[]> => {
   const response = await apiClient.get(`/usuarios/${userId}/albums-seguidos`);
   return response.data;
 };
 
 /** Seguir álbum */
-export const seguirAlbum = async (userId: number, albumId: number): Promise<void> => {
+export const followAlbum = async (userId: number, albumId: number): Promise<void> => {
   await apiClient.put(`/usuarios/${userId}/albums-seguidos/${albumId}`);
 };
 
 /** Dejar de seguir álbum */
-export const dejarDeSeguirAlbum = async (userId: number, albumId: number): Promise<void> => {
+export const unfollowAlbum = async (userId: number, albumId: number): Promise<void> => {
   await apiClient.delete(`/usuarios/${userId}/albums-seguidos/${albumId}`);
 };
+

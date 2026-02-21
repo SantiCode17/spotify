@@ -3,6 +3,7 @@ import { View, Text, Pressable, Alert } from 'react-native';
 import SpotifyInput from '../ui/SpotifyInput';
 import SpotifyButton from '../ui/SpotifyButton';
 import { useCreatePlaylist } from '../../hooks/usePlaylists';
+import { useAuthStore } from '../../store/authStore';
 
 interface CreatePlaylistModalProps {
   onClose: () => void;
@@ -11,7 +12,8 @@ interface CreatePlaylistModalProps {
 const CreatePlaylistModal: React.FC<CreatePlaylistModalProps> = ({ onClose }) => {
   const [titulo, setTitulo] = useState('');
   const [error, setError] = useState('');
-  const createPlaylist = useCreatePlaylist();
+  const userId = useAuthStore((s) => s.userId);
+  const createPlaylist = useCreatePlaylist(userId);
 
   const handleCreate = () => {
     // Validaciones
