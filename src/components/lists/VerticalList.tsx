@@ -1,8 +1,7 @@
 import React from 'react';
-import { FlatList, View } from 'react-native';
-import LoadingSpinner from '../ui/LoadingSpinner';
-import EmptyState from '../ui/EmptyState';
-import ErrorState from '../ui/ErrorState';
+import { FlatList, View, Text } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { ShimmerRow } from '../ui/ShimmerPlaceholder';
 
 interface VerticalListProps<T> {
   data: T[] | undefined;
@@ -10,9 +9,13 @@ interface VerticalListProps<T> {
   keyExtractor: (item: T) => string;
   isLoading?: boolean;
   isError?: boolean;
-  emptyMessage?: string;
+  emptyIcon?: keyof typeof Ionicons.glyphMap;
+  emptyTitle?: string;
+  emptySubtitle?: string;
+  errorMessage?: string;
   onRetry?: () => void;
   ListHeaderComponent?: React.ReactElement;
+  scrollEnabled?: boolean;
 }
 
 function VerticalList<T>({
@@ -21,20 +24,48 @@ function VerticalList<T>({
   keyExtractor,
   isLoading = false,
   isError = false,
-  emptyMessage = 'No hay elementos',
+  emptyIcon = 'list-outline',
+  emptyTitle = 'No hay elementos',
+  emptySubtitle,
+  errorMessage = 'Error al cargar datos',
   onRetry,
   ListHeaderComponent,
+  scrollEnabled = true,
 }: VerticalListProps<T>) {
   if (isLoading) {
-    return <LoadingSpinner fullScreen={false} />;
+    return (
+      <View className="px-4">
+        {[1, 2, 3, 4, 5].map((i) => (
+          <ShimmerRow key={i} />
+        ))}
+      </View>
+    );
   }
 
   if (isError) {
-    return <ErrorState message="Error al cargar datos" onRetry={onRetry} />;
+    return (
+      <View className="items-center justify-center py-8 px-4">
+        <Ionicons name="cloud-offline-outline" size={32} color="#535353" />
+        <Text className="text-spotify-gray text-sm mt-2">{errorMessage}</Text>
+        {onRetry && (
+          <Text onPress={onRetry} className="text-spotify-green text-sm font-semibold mt-2">
+            Reintentar
+          </Text>
+        )}
+      </View>
+    );
   }
 
   if (!data || data.length === 0) {
-    return <EmptyState title={emptyMessage} />;
+    return (
+      <View className="items-center justify-center py-8 px-4">
+        <Ionicons name={emptyIcon} size={32} color="#535353" />
+        <Text className="text-spotify-gray text-sm mt-2">{emptyTitle}</Text>
+        {emptySubtitle && (
+          <Text className="text-spotify-light-gray text-xs mt-1">{emptySubtitle}</Text>
+        )}
+      </View>
+    );
   }
 
   return (
@@ -43,6 +74,7 @@ function VerticalList<T>({
       renderItem={({ item }) => renderItem(item)}
       keyExtractor={keyExtractor}
       showsVerticalScrollIndicator={false}
+      scrollEnabled={scrollEnabled}
       ListHeaderComponent={ListHeaderComponent}
       ItemSeparatorComponent={() => <View className="h-px bg-spotify-darker mx-4" />}
     />

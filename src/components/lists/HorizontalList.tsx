@@ -1,8 +1,7 @@
 import React from 'react';
-import { FlatList, View } from 'react-native';
-import LoadingSpinner from '../ui/LoadingSpinner';
-import EmptyState from '../ui/EmptyState';
-import ErrorState from '../ui/ErrorState';
+import { FlatList, View, Text } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { ShimmerCard } from '../ui/ShimmerPlaceholder';
 
 interface HorizontalListProps<T> {
   data: T[] | undefined;
@@ -10,7 +9,10 @@ interface HorizontalListProps<T> {
   keyExtractor: (item: T) => string;
   isLoading?: boolean;
   isError?: boolean;
-  emptyMessage?: string;
+  emptyIcon?: keyof typeof Ionicons.glyphMap;
+  emptyTitle?: string;
+  emptySubtitle?: string;
+  errorMessage?: string;
   onRetry?: () => void;
 }
 
@@ -20,19 +22,48 @@ function HorizontalList<T>({
   keyExtractor,
   isLoading = false,
   isError = false,
-  emptyMessage = 'No hay elementos',
+  emptyIcon = 'albums-outline',
+  emptyTitle = 'No hay elementos',
+  emptySubtitle,
+  errorMessage = 'Error al cargar datos',
   onRetry,
 }: HorizontalListProps<T>) {
   if (isLoading) {
-    return <LoadingSpinner fullScreen={false} />;
+    return (
+      <View className="flex-row px-4">
+        {[1, 2, 3].map((i) => (
+          <View key={i} style={{ marginRight: 12 }}>
+            <ShimmerCard />
+          </View>
+        ))}
+      </View>
+    );
   }
 
   if (isError) {
-    return <ErrorState message="Error al cargar datos" onRetry={onRetry} />;
+    return (
+      <View className="items-center justify-center py-8 px-4">
+        <Ionicons name="cloud-offline-outline" size={32} color="#535353" />
+        <Text className="text-spotify-gray text-sm mt-2">{errorMessage}</Text>
+        {onRetry && (
+          <Text onPress={onRetry} className="text-spotify-green text-sm font-semibold mt-2">
+            Reintentar
+          </Text>
+        )}
+      </View>
+    );
   }
 
   if (!data || data.length === 0) {
-    return <EmptyState title={emptyMessage} />;
+    return (
+      <View className="items-center justify-center py-8 px-4">
+        <Ionicons name={emptyIcon} size={32} color="#535353" />
+        <Text className="text-spotify-gray text-sm mt-2">{emptyTitle}</Text>
+        {emptySubtitle && (
+          <Text className="text-spotify-light-gray text-xs mt-1">{emptySubtitle}</Text>
+        )}
+      </View>
+    );
   }
 
   return (
@@ -43,7 +74,6 @@ function HorizontalList<T>({
       horizontal
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={{ paddingHorizontal: 16 }}
-      ItemSeparatorComponent={() => <View className="w-1" />}
     />
   );
 }

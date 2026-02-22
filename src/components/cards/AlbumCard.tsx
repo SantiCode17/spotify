@@ -1,53 +1,69 @@
 import React from 'react';
-import { View, Text, Image, Pressable } from 'react-native';
+import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { Album } from '../../types/api.types';
 
 interface AlbumCardProps {
   album: Album;
-  onPress?: () => void;
-  horizontal?: boolean;
+  onPress: () => void;
+  size?: 'sm' | 'md';
 }
 
-const AlbumCard: React.FC<AlbumCardProps> = ({ album, onPress, horizontal = true }) => {
-  if (horizontal) {
+const AlbumCard: React.FC<AlbumCardProps> = ({ album, onPress, size = 'md' }) => {
+  const subtitle = album.artista?.nombre
+    ? `Álbum · ${album.artista.nombre}`
+    : 'Álbum';
+
+  if (size === 'sm') {
     return (
-      <Pressable onPress={onPress} className="mr-4 w-36">
-        <View className="w-36 h-36 bg-spotify-darker rounded-lg items-center justify-center overflow-hidden">
+      <TouchableOpacity
+        activeOpacity={0.7}
+        onPress={onPress}
+        className="flex-row items-center py-2 px-4"
+      >
+        <View className="w-14 h-14 bg-spotify-darker rounded items-center justify-center overflow-hidden">
           {album.imagen ? (
             <Image source={{ uri: album.imagen }} className="w-full h-full" resizeMode="cover" />
           ) : (
-            <Ionicons name="disc" size={48} color="#535353" />
+            <Ionicons name="disc" size={24} color="#535353" />
           )}
         </View>
-        <Text className="text-spotify-white text-sm font-semibold mt-2" numberOfLines={1}>
-          {album.titulo}
-        </Text>
-        <Text className="text-spotify-gray text-xs mt-1" numberOfLines={1}>
-          {album.anyo ? `Álbum • ${album.anyo}` : 'Álbum'}
-        </Text>
-      </Pressable>
+        <View className="flex-1 ml-3">
+          <Text className="text-spotify-white text-base font-semibold" numberOfLines={1}>
+            {album.titulo}
+          </Text>
+          <Text className="text-spotify-gray text-sm" numberOfLines={1}>
+            {subtitle}
+          </Text>
+        </View>
+      </TouchableOpacity>
     );
   }
 
+  // size === 'md'
   return (
-    <Pressable onPress={onPress} className="flex-row items-center py-3 px-4">
-      <View className="w-12 h-12 bg-spotify-darker rounded items-center justify-center overflow-hidden">
+    <TouchableOpacity
+      activeOpacity={0.7}
+      onPress={onPress}
+      style={{ width: 150, marginRight: 12 }}
+    >
+      <View
+        className="bg-spotify-darker items-center justify-center overflow-hidden"
+        style={{ width: 150, height: 150, borderRadius: 4 }}
+      >
         {album.imagen ? (
           <Image source={{ uri: album.imagen }} className="w-full h-full" resizeMode="cover" />
         ) : (
-          <Ionicons name="disc" size={24} color="#535353" />
+          <Ionicons name="disc" size={48} color="#535353" />
         )}
       </View>
-      <View className="flex-1 ml-3">
-        <Text className="text-spotify-white text-base font-semibold" numberOfLines={1}>
-          {album.titulo}
-        </Text>
-        <Text className="text-spotify-gray text-sm" numberOfLines={1}>
-          {album.anyo ? `Álbum • ${album.anyo}` : 'Álbum'}
-        </Text>
-      </View>
-    </Pressable>
+      <Text className="text-spotify-white text-sm font-bold mt-2" numberOfLines={2}>
+        {album.titulo}
+      </Text>
+      <Text className="text-spotify-gray text-xs mt-1" numberOfLines={1}>
+        {subtitle}
+      </Text>
+    </TouchableOpacity>
   );
 };
 

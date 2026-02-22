@@ -25,10 +25,10 @@ export const searchAll = async (query: string): Promise<SearchResults> => {
   ]);
 
   return {
-    canciones: (canciones as Cancion[]).filter((c) => c.titulo?.toLowerCase().includes(q)),
-    artistas: (artistas as Artista[]).filter((a) => a.nombre?.toLowerCase().includes(q)),
-    albums: (albums as Album[]).filter((a) => a.titulo?.toLowerCase().includes(q)),
-    playlists: (playlists as Playlist[]).filter((p) => p.titulo?.toLowerCase().includes(q)),
-    podcasts: (podcasts as Podcast[]).filter((p) => p.titulo?.toLowerCase().includes(q)),
+    canciones: (canciones as Cancion[]).filter((c) => c.titulo?.toLowerCase().includes(q)).slice(0, 5),
+    artistas: (artistas as Artista[]).filter((a) => a.nombre?.toLowerCase().includes(q)).slice(0, 5),
+    albums: (albums as Album[]).filter((a) => a.titulo?.toLowerCase().includes(q)).slice(0, 5),
+    playlists: (playlists as Playlist[]).filter((p) => p.titulo?.toLowerCase().includes(q)).slice(0, 5),
+    podcasts: (podcasts as Podcast[]).filter((p) => p.titulo?.toLowerCase().includes(q)).slice(0, 5),
   };
 };
