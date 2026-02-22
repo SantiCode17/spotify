@@ -1,8 +1,8 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
-// ⚠️ Cambia esta IP por la de tu máquina local
-export const BASE_URL = 'http://192.168.1.100:8000';
+// ⚠️ Cambia esta IP por la de tu máquina local (puerto 8082 según docker-compose)
+export const BASE_URL = 'http://192.168.1.43:8082';
 
 export const apiClient = axios.create({
   baseURL: BASE_URL,
@@ -33,24 +33,29 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
+    const url = error.config?.url ?? 'unknown';
+    const method = error.config?.method?.toUpperCase() ?? '?';
+
     if (error.response) {
-      switch (error.response.status) {
+      const { status, data } = error.response;
+      const detail = typeof data === 'object' ? JSON.stringify(data) : data;
+      switch (status) {
         case 401:
-          console.error('No autorizado — redirigir a login');
+          console.error(`[API 401] ${method} ${url} — No autorizado`);
           break;
         case 404:
-          console.error('Recurso no encontrado');
+          console.error(`[API 404] ${method} ${url} — Recurso no encontrado`);
           break;
         case 500:
-          console.error('Error interno del servidor');
+          console.error(`[API 500] ${method} ${url} — Error interno: ${detail}`);
           break;
         default:
-          console.error(`Error HTTP ${error.response.status}`);
+          console.error(`[API ${status}] ${method} ${url} — ${detail}`);
       }
     } else if (error.request) {
-      console.error('No se recibió respuesta del servidor');
+      console.error(`[API] ${method} ${url} — No se recibió respuesta del servidor`);
     } else {
-      console.error('Error de configuración:', error.message);
+      console.error(`[API] Error de configuración: ${error.message}`);
     }
     return Promise.reject(error);
   }

@@ -5,7 +5,6 @@ import {
   Text,
   TouchableOpacity,
   FlatList,
-  Image,
   Alert,
   ActivityIndicator,
   Pressable,
@@ -59,12 +58,8 @@ const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({
       className="flex-row items-center py-3 px-4"
       disabled={addSongMutation.isPending}
     >
-      <View className="w-12 h-12 bg-spotify-darker rounded items-center justify-center overflow-hidden">
-        {item.imagen ? (
-          <Image source={{ uri: item.imagen }} className="w-full h-full" resizeMode="cover" />
-        ) : (
-          <Ionicons name="musical-notes" size={24} color="#535353" />
-        )}
+      <View className="w-12 h-12 bg-spotify-darker rounded items-center justify-center">
+        <Ionicons name="musical-notes" size={24} color="#535353" />
       </View>
       <View className="flex-1 ml-3">
         <Text className="text-spotify-white text-base font-semibold" numberOfLines={1}>

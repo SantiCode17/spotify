@@ -7,68 +7,54 @@ export interface Usuario {
   username: string;
   email: string;
   genero?: string;
-  fecha_nacimiento?: string;
-  codigo_postal?: string;
-  foto_perfil?: string;
-  plan?: string;
-}
-
-export interface Plan {
-  tipo: 'free' | 'premium';
-  fecha_renovacion?: string;
-}
-
-export interface Configuracion {
-  id: number;
-  usuario_id: number;
-  idioma?: string;
-  tema?: string;
-  notificaciones?: boolean;
-  calidad_audio?: string;
-  [key: string]: unknown;
+  fechaNacimiento?: string;
+  codigoPostal?: string;
 }
 
 export interface Playlist {
   id: number;
   titulo: string;
-  usuario_id: number;
-  estado?: string;
-  imagen?: string;
-  descripcion?: string;
+  numeroCanciones?: number;
+  fechaCreacion?: string;
+  usuario?: Pick<Usuario, 'id' | 'username' | 'email'>;
+}
+
+/** Respuesta de GET /usuarios/{userId}/playlists (wrapper con estado) */
+export interface UserPlaylistWrapper {
+  playlist: Playlist;
+  estado: string;
 }
 
 export interface Cancion {
   id: number;
   titulo: string;
   duracion?: number;
-  artista_id?: number;
-  album_id?: number;
-  imagen?: string;
-  artista?: Artista;
-  album?: Album;
+  numeroReproducciones?: number;
+  album?: {
+    id: number;
+    titulo: string;
+    anyo?: string;
+    artista?: { id: number; nombre: string };
+  };
 }
 
 export interface Artista {
   id: number;
   nombre: string;
-  imagen?: string;
-  biografia?: string;
 }
 
 export interface Album {
   id: number;
   titulo: string;
-  artista_id?: number;
-  anyo?: number;
-  imagen?: string;
-  artista?: Artista;
+  anyo?: string;
+  artista?: { id: number; nombre: string };
 }
 
 export interface Podcast {
   id: number;
   titulo: string;
   descripcion?: string;
-  imagen?: string;
+  anyo?: string;
 }
 
 export interface Capitulo {
@@ -76,42 +62,14 @@ export interface Capitulo {
   titulo: string;
   descripcion?: string;
   duracion?: number;
-  podcast_id: number;
-  fecha_publicacion?: string;
-}
-
-export interface Pago {
-  id: number;
-  fecha: string;
-  cantidad: number;
-  suscripcion_id?: number;
-}
-
-export interface Suscripcion {
-  id: number;
-  tipo: string;
-  fecha_inicio: string;
-  fecha_fin?: string;
-  usuario_id: number;
+  fecha?: string;
+  numeroReproducciones?: number;
 }
 
 export interface CancionPlaylist {
   cancion: Cancion;
-  fecha_anyadida: string;
-  usuario_id: number;
-}
-
-// Respuesta genérica de la API
-export interface ApiResponse<T> {
-  data: T;
-  message?: string;
-}
-
-// Respuesta paginada
-export interface PaginatedResponse<T> {
-  data: T[];
-  total: number;
-  page: number;
+  fechaAnyadida?: string;
+  usuario?: Pick<Usuario, 'id' | 'username' | 'email'>;
 }
 
 // Credenciales de login
@@ -125,5 +83,5 @@ export interface RegisterData {
   username: string;
   email: string;
   password: string;
-  fecha_nacimiento: string;
+  fechaNacimiento: string;
 }

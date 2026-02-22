@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Image, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { Cancion } from '../../types/api.types';
 
@@ -29,6 +29,8 @@ const SongCard: React.FC<SongCardProps> = ({
     return `${min}:${sec.toString().padStart(2, '0')}`;
   };
 
+  const artistName = song.album?.artista?.nombre || 'Artista desconocido';
+
   return (
     <TouchableOpacity
       activeOpacity={0.7}
@@ -39,12 +41,8 @@ const SongCard: React.FC<SongCardProps> = ({
       {index !== undefined ? (
         <Text className="text-spotify-gray text-sm w-8 text-center">{index}</Text>
       ) : (
-        <View className="w-12 h-12 bg-spotify-darker rounded items-center justify-center overflow-hidden">
-          {song.imagen ? (
-            <Image source={{ uri: song.imagen }} className="w-full h-full" resizeMode="cover" />
-          ) : (
-            <Ionicons name="musical-note" size={24} color="#535353" />
-          )}
+        <View className="w-12 h-12 bg-spotify-darker rounded items-center justify-center">
+          <Ionicons name="musical-note" size={24} color="#535353" />
         </View>
       )}
 
@@ -54,7 +52,7 @@ const SongCard: React.FC<SongCardProps> = ({
           {song.titulo}
         </Text>
         <Text className="text-spotify-gray text-sm" numberOfLines={1}>
-          {song.artista?.nombre || 'Artista desconocido'}
+          {artistName}
           {song.duracion ? ` · ${formatDuration(song.duracion)}` : ''}
         </Text>
       </View>

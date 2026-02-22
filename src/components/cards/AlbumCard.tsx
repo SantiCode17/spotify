@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Image, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { Album } from '../../types/api.types';
 
@@ -21,12 +21,8 @@ const AlbumCard: React.FC<AlbumCardProps> = ({ album, onPress, size = 'md' }) =>
         onPress={onPress}
         className="flex-row items-center py-2 px-4"
       >
-        <View className="w-14 h-14 bg-spotify-darker rounded items-center justify-center overflow-hidden">
-          {album.imagen ? (
-            <Image source={{ uri: album.imagen }} className="w-full h-full" resizeMode="cover" />
-          ) : (
-            <Ionicons name="disc" size={24} color="#535353" />
-          )}
+        <View className="w-14 h-14 bg-spotify-darker rounded items-center justify-center">
+          <Ionicons name="disc" size={24} color="#535353" />
         </View>
         <View className="flex-1 ml-3">
           <Text className="text-spotify-white text-base font-semibold" numberOfLines={1}>
@@ -40,7 +36,6 @@ const AlbumCard: React.FC<AlbumCardProps> = ({ album, onPress, size = 'md' }) =>
     );
   }
 
-  // size === 'md'
   return (
     <TouchableOpacity
       activeOpacity={0.7}
@@ -48,14 +43,10 @@ const AlbumCard: React.FC<AlbumCardProps> = ({ album, onPress, size = 'md' }) =>
       style={{ width: 150, marginRight: 12 }}
     >
       <View
-        className="bg-spotify-darker items-center justify-center overflow-hidden"
+        className="bg-spotify-darker items-center justify-center"
         style={{ width: 150, height: 150, borderRadius: 4 }}
       >
-        {album.imagen ? (
-          <Image source={{ uri: album.imagen }} className="w-full h-full" resizeMode="cover" />
-        ) : (
-          <Ionicons name="disc" size={48} color="#535353" />
-        )}
+        <Ionicons name="disc" size={48} color="#535353" />
       </View>
       <Text className="text-spotify-white text-sm font-bold mt-2" numberOfLines={2}>
         {album.titulo}

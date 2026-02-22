@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Image, Pressable } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import { DrawerContentScrollView, type DrawerContentComponentProps } from '@react-navigation/drawer';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../store/authStore';
@@ -37,13 +37,9 @@ const DrawerContent: React.FC<DrawerContentComponentProps> = (props) => {
       {/* Header con info del usuario */}
       <View className="px-5 py-6 border-b border-spotify-darker">
         <View className="w-16 h-16 rounded-full bg-spotify-darker items-center justify-center overflow-hidden mb-3">
-          {user?.foto_perfil ? (
-            <Image source={{ uri: user.foto_perfil }} className="w-full h-full" resizeMode="cover" />
-          ) : (
-            <Text className="text-spotify-green text-xl font-bold">
-              {getInitials(user?.username)}
-            </Text>
-          )}
+          <Text className="text-spotify-green text-xl font-bold">
+            {getInitials(user?.username)}
+          </Text>
         </View>
         <Text className="text-spotify-white text-lg font-bold">
           {user?.username || 'Usuario'}
@@ -64,16 +60,14 @@ const DrawerContent: React.FC<DrawerContentComponentProps> = (props) => {
           </Pressable>
         ))}
 
-        {/* Suscripciones — solo si es premium */}
-        {user?.plan === 'premium' && (
-          <Pressable
-            onPress={() => router.push('/(app)/subscriptions' as never)}
-            className="flex-row items-center px-5 py-4 active:bg-spotify-darker"
-          >
-            <Ionicons name="card" size={22} color="#7B2FBE" />
-            <Text className="text-spotify-purple text-base ml-4 font-semibold">Suscripciones</Text>
-          </Pressable>
-        )}
+        {/* Suscripciones */}
+        <Pressable
+          onPress={() => router.push('/(app)/subscriptions' as never)}
+          className="flex-row items-center px-5 py-4 active:bg-spotify-darker"
+        >
+          <Ionicons name="card" size={22} color="#7B2FBE" />
+          <Text className="text-spotify-purple text-base ml-4 font-semibold">Suscripciones</Text>
+        </Pressable>
       </View>
 
       {/* Footer: Logout + Versión */}

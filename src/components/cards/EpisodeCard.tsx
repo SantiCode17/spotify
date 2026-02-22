@@ -34,7 +34,7 @@ const EpisodeCard: React.FC<EpisodeCardProps> = ({ episode, onPress }) => {
           </Text>
         ) : null}
         <Text className="text-spotify-light-gray text-xs mt-0.5" numberOfLines={1}>
-          {episode.fecha_publicacion || ''}
+          {episode.fecha || ''}
           {episode.duracion ? ` · ${formatDuration(episode.duracion)}` : ''}
         </Text>
       </View>

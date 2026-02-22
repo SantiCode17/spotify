@@ -43,7 +43,7 @@ export const register = async (data: RegisterData): Promise<Usuario> => {
     username: data.username,
     password: data.password,
     email: data.email,
-    fecha_nacimiento: data.fecha_nacimiento,
+    fechaNacimiento: data.fechaNacimiento,
   });
   return response.data;
 };

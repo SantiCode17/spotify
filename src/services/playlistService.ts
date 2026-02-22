@@ -1,10 +1,10 @@
 import apiClient from '../config/api';
-import type { Playlist, Cancion } from '../types/api.types';
+import type { Playlist, Cancion, UserPlaylistWrapper } from '../types/api.types';
 
-/** Obtener playlists propias del usuario */
+/** Obtener playlists propias del usuario (la API devuelve [{playlist, estado}]) */
 export const getUserPlaylists = async (userId: number): Promise<Playlist[]> => {
-  const response = await apiClient.get(`/usuarios/${userId}/playlists`);
-  return response.data;
+  const response = await apiClient.get<UserPlaylistWrapper[]>(`/usuarios/${userId}/playlists`);
+  return response.data.map((w) => w.playlist);
 };
 
 /** Obtener playlists seguidas por el usuario */
