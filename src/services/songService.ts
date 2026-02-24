@@ -15,8 +15,13 @@ export const getSongDetail = async (songId: number): Promise<Cancion> => {
 
 /** Obtener canciones guardadas (liked songs) del usuario */
 export const getSavedSongs = async (userId: number): Promise<Cancion[]> => {
-  const response = await apiClient.get(`/usuarios/${userId}/canciones-guardadas`);
-  return response.data;
+  try {
+    const response = await apiClient.get(`/usuarios/${userId}/canciones-guardadas`);
+    return response.data;
+  } catch (e: any) {
+    if (e.response?.status === 404) return [];
+    throw e;
+  }
 };
 
 /** Guardar canción (like) */

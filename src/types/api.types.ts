@@ -72,6 +72,29 @@ export interface CancionPlaylist {
   usuario?: Pick<Usuario, 'id' | 'username' | 'email'>;
 }
 
+// ─── Plan del usuario ────────────────────────────────────
+export interface Plan {
+  tipo: string;              // "free" | "premium"
+  fechaRevision?: string;    // para plan free
+  fechaRenovacion?: string;  // para plan premium
+}
+
+// ─── Configuración del usuario ───────────────────────────
+export interface Configuracion {
+  autoplay: boolean;
+  ajuste: boolean;
+  normalizacion: boolean;
+  calidad: { nombre: string };
+  tipoDescarga: { nombre: string };
+  idioma: { nombre: string };
+}
+
+// ─── Pago ────────────────────────────────────────────────
+export interface Pago {
+  numeroOrden: number;
+  fecha: string; // ISO string
+}
+
 // Credenciales de login
 export interface LoginCredentials {
   email: string;

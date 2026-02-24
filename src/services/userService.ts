@@ -1,6 +1,7 @@
 import apiClient from '../config/api';
 import type { Usuario, Plan, Configuracion, Pago } from '../types/api.types';
 
+
 /** Obtener usuario por ID */
 export const getUser = async (userId: number): Promise<Usuario> => {
   const response = await apiClient.get(`/usuarios/${userId}`);
@@ -24,6 +25,11 @@ export const activatePremium = async (userId: number): Promise<void> => {
   await apiClient.post(`/usuarios/${userId}/premium`);
 };
 
+/** Cancelar plan premium (volver a Free) */
+export const cancelPremium = async (userId: number): Promise<void> => {
+  await apiClient.delete(`/usuarios/${userId}/premium`);
+};
+
 /** Obtener configuración del usuario */
 export const getUserConfig = async (userId: number): Promise<Configuracion> => {
   const response = await apiClient.get(`/usuarios/${userId}/configuracion`);
@@ -33,7 +39,7 @@ export const getUserConfig = async (userId: number): Promise<Configuracion> => {
 /** Actualizar configuración del usuario */
 export const updateUserConfig = async (
   userId: number,
-  data: Partial<Configuracion>
+  data: Record<string, unknown>
 ): Promise<Configuracion> => {
   const response = await apiClient.put(`/usuarios/${userId}/configuracion`, data);
   return response.data;
@@ -41,8 +47,13 @@ export const updateUserConfig = async (
 
 /** Obtener historial de pagos */
 export const getUserPayments = async (userId: number): Promise<Pago[]> => {
-  const response = await apiClient.get(`/usuarios/${userId}/pagos`);
-  return response.data;
+  try {
+    const response = await apiClient.get(`/usuarios/${userId}/pagos`);
+    return Array.isArray(response.data) ? response.data : [];
+  } catch (e: any) {
+    if (e.response?.status === 404) return [];
+    throw e;
+  }
 };
 
 /** Obtener todos los usuarios (para búsqueda) */

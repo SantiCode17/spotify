@@ -8,6 +8,7 @@ import {
   Alert,
   ActivityIndicator,
   Pressable,
+  Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -16,6 +17,7 @@ import { useAuthStore } from '../../store/authStore';
 import { useUserPlaylists } from '../../hooks/usePlaylists';
 import * as playlistService from '../../services/playlistService';
 import { queryKeys } from '../../config/queryKeys';
+import { getCoverImage } from '../../utils/coverImages';
 import type { Playlist } from '../../types/api.types';
 
 interface AddToPlaylistModalProps {
@@ -58,8 +60,12 @@ const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({
       className="flex-row items-center py-3 px-4"
       disabled={addSongMutation.isPending}
     >
-      <View className="w-12 h-12 bg-spotify-darker rounded items-center justify-center">
-        <Ionicons name="musical-notes" size={24} color="#535353" />
+      <View className="w-12 h-12 rounded items-center justify-center overflow-hidden">
+        <Image
+          source={getCoverImage(item.id, 'playlist')}
+          style={{ width: 48, height: 48, borderRadius: 4 }}
+          resizeMode="cover"
+        />
       </View>
       <View className="flex-1 ml-3">
         <Text className="text-spotify-white text-base font-semibold" numberOfLines={1}>

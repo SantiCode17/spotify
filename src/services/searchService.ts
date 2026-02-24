@@ -25,10 +25,28 @@ export const searchAll = async (query: string): Promise<SearchResults> => {
   ]);
 
   return {
-    canciones: (canciones as Cancion[]).filter((c) => c.titulo?.toLowerCase().includes(q)).slice(0, 5),
-    artistas: (artistas as Artista[]).filter((a) => a.nombre?.toLowerCase().includes(q)).slice(0, 5),
-    albums: (albums as Album[]).filter((a) => a.titulo?.toLowerCase().includes(q)).slice(0, 5),
-    playlists: (playlists as Playlist[]).filter((p) => p.titulo?.toLowerCase().includes(q)).slice(0, 5),
-    podcasts: (podcasts as Podcast[]).filter((p) => p.titulo?.toLowerCase().includes(q)).slice(0, 5),
+    canciones: (canciones as Cancion[])
+      .filter(
+        (c) =>
+          c.titulo?.toLowerCase().includes(q) ||
+          c.album?.artista?.nombre?.toLowerCase().includes(q)
+      )
+      .slice(0, 10),
+    artistas: (artistas as Artista[])
+      .filter((a) => a.nombre?.toLowerCase().includes(q))
+      .slice(0, 10),
+    albums: (albums as Album[])
+      .filter(
+        (a) =>
+          a.titulo?.toLowerCase().includes(q) ||
+          a.artista?.nombre?.toLowerCase().includes(q)
+      )
+      .slice(0, 10),
+    playlists: (playlists as Playlist[])
+      .filter((p) => p.titulo?.toLowerCase().includes(q))
+      .slice(0, 10),
+    podcasts: (podcasts as Podcast[])
+      .filter((p) => p.titulo?.toLowerCase().includes(q))
+      .slice(0, 10),
   };
 };

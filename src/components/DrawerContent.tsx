@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, Pressable, Image } from 'react-native';
 import { DrawerContentScrollView, type DrawerContentComponentProps } from '@react-navigation/drawer';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../store/authStore';
+import { getCoverImage } from '../utils/coverImages';
 import { router } from 'expo-router';
 
 const DrawerContent: React.FC<DrawerContentComponentProps> = (props) => {
@@ -37,9 +38,17 @@ const DrawerContent: React.FC<DrawerContentComponentProps> = (props) => {
       {/* Header con info del usuario */}
       <View className="px-5 py-6 border-b border-spotify-darker">
         <View className="w-16 h-16 rounded-full bg-spotify-darker items-center justify-center overflow-hidden mb-3">
-          <Text className="text-spotify-green text-xl font-bold">
-            {getInitials(user?.username)}
-          </Text>
+          {user?.id ? (
+            <Image
+              source={getCoverImage(user.id, 'user')}
+              style={{ width: 64, height: 64, borderRadius: 32 }}
+              resizeMode="cover"
+            />
+          ) : (
+            <Text className="text-spotify-green text-xl font-bold">
+              {getInitials(user?.username)}
+            </Text>
+          )}
         </View>
         <Text className="text-spotify-white text-lg font-bold">
           {user?.username || 'Usuario'}

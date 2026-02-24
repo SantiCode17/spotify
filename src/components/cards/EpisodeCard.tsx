@@ -1,45 +1,39 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { getCoverImage } from '../../utils/coverImages';
+import { formatDurationMin, formatDate } from '../../utils/formatters';
 import type { Capitulo } from '../../types/api.types';
 
-interface EpisodeCardProps {
+interface Props {
   episode: Capitulo;
   onPress?: () => void;
 }
 
-const EpisodeCard: React.FC<EpisodeCardProps> = ({ episode, onPress }) => {
-  const formatDuration = (seconds?: number) => {
-    if (!seconds) return '';
-    const min = Math.floor(seconds / 60);
-    return `${min} min`;
-  };
-
+const EpisodeCard: React.FC<Props> = ({ episode, onPress }) => {
   return (
     <TouchableOpacity
       activeOpacity={0.7}
       onPress={onPress}
-      className="flex-row items-center py-2 px-4"
+      className="flex-row items-center py-3 px-4"
     >
-      <View className="w-12 h-12 bg-spotify-darker rounded-lg items-center justify-center">
-        <Ionicons name="play-circle" size={24} color="#1DB954" />
-      </View>
+      <Image
+        source={getCoverImage(episode.id, 'episode')}
+        style={{ width: 56, height: 56, borderRadius: 8 }}
+        resizeMode="cover"
+      />
       <View className="flex-1 ml-3">
-        <Text className="text-spotify-white text-base font-semibold" numberOfLines={1}>
+        <Text className="text-white text-base font-semibold" numberOfLines={1}>
           {episode.titulo}
         </Text>
-        {episode.descripcion ? (
-          <Text className="text-spotify-gray text-sm" numberOfLines={1}>
-            {episode.descripcion}
-          </Text>
-        ) : null}
-        <Text className="text-spotify-light-gray text-xs mt-0.5" numberOfLines={1}>
-          {episode.fecha || ''}
-          {episode.duracion ? ` · ${formatDuration(episode.duracion)}` : ''}
+        <Text className="text-spotify-gray text-sm" numberOfLines={1}>
+          {episode.fecha ? formatDate(episode.fecha) : ''}
+          {episode.duracion ? ` · ${formatDurationMin(episode.duracion)}` : ''}
         </Text>
       </View>
+      <Ionicons name="play-circle-outline" size={28} color="#1DB954" />
     </TouchableOpacity>
   );
 };
 
-export default EpisodeCard;
+export default React.memo(EpisodeCard);

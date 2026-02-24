@@ -21,8 +21,13 @@ export const getAlbumSongs = async (albumId: number): Promise<Cancion[]> => {
 
 /** Obtener álbumes seguidos por el usuario */
 export const getFollowedAlbums = async (userId: number): Promise<Album[]> => {
-  const response = await apiClient.get(`/usuarios/${userId}/albums-seguidos`);
-  return response.data;
+  try {
+    const response = await apiClient.get(`/usuarios/${userId}/albums-seguidos`);
+    return response.data;
+  } catch (e: any) {
+    if (e.response?.status === 404) return [];
+    throw e;
+  }
 };
 
 /** Seguir álbum */

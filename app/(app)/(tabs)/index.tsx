@@ -156,7 +156,6 @@ const HomeScreen = () => {
                 <SongCard
                   song={song}
                   index={index + 1}
-                  isLiked
                   onPress={() => {}}
                 />
                 {index < displaySongs.length - 1 && (

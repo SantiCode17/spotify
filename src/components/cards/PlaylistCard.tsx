@@ -1,55 +1,51 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
+import { getCoverImage } from '../../utils/coverImages';
 import type { Playlist } from '../../types/api.types';
 
-interface PlaylistCardProps {
+interface Props {
   playlist: Playlist;
-  onPress: () => void;
   size?: 'sm' | 'md';
+  onPress?: () => void;
 }
 
-const PlaylistCard: React.FC<PlaylistCardProps> = ({ playlist, onPress, size = 'md' }) => {
-  if (size === 'sm') {
-    return (
-      <TouchableOpacity
-        activeOpacity={0.7}
-        onPress={onPress}
-        className="flex-row items-center py-2 px-4"
-      >
-        <View className="w-14 h-14 bg-spotify-darker rounded-lg items-center justify-center">
-          <Ionicons name="musical-notes" size={24} color="#535353" />
-        </View>
-        <View className="flex-1 ml-3">
-          <Text className="text-spotify-white text-base font-semibold" numberOfLines={1}>
-            {playlist.titulo}
-          </Text>
-          <Text className="text-spotify-gray text-sm" numberOfLines={1}>
-            Playlist
-          </Text>
-        </View>
-      </TouchableOpacity>
-    );
-  }
+const PlaylistCard: React.FC<Props> = ({ playlist, size = 'md', onPress }) => {
+  const isSm = size === 'sm';
+  const imgSize = isSm ? 56 : 140;
 
   return (
     <TouchableOpacity
       activeOpacity={0.7}
       onPress={onPress}
-      style={{ width: 150, marginRight: 12 }}
+      style={{ width: isSm ? undefined : imgSize }}
+      className={isSm ? 'flex-row items-center py-2 px-4' : 'mr-3'}
     >
-      <View
-        className="bg-spotify-darker rounded-lg items-center justify-center"
-        style={{ width: 150, height: 150 }}
-      >
-        <Ionicons name="musical-notes" size={48} color="#535353" />
-      </View>
-      <Text className="text-spotify-white text-sm font-bold mt-2" numberOfLines={2}>
-        {playlist.titulo}
-      </Text>
-      <Text className="text-spotify-gray text-xs mt-1">Playlist</Text>
+      <Image
+        source={getCoverImage(playlist.id, 'playlist')}
+        style={{ width: imgSize, height: imgSize, borderRadius: 8 }}
+        resizeMode="cover"
+      />
+      {isSm ? (
+        <View className="flex-1 ml-3">
+          <Text className="text-white text-base font-semibold" numberOfLines={1}>
+            {playlist.titulo}
+          </Text>
+          <Text className="text-spotify-gray text-sm" numberOfLines={1}>
+            Playlist{playlist.numeroCanciones ? ` · ${playlist.numeroCanciones} canciones` : ''}
+          </Text>
+        </View>
+      ) : (
+        <View className="mt-2">
+          <Text className="text-white text-sm font-semibold" numberOfLines={1}>
+            {playlist.titulo}
+          </Text>
+          <Text className="text-spotify-gray text-xs" numberOfLines={1}>
+            {playlist.numeroCanciones ? `${playlist.numeroCanciones} canciones` : 'Playlist'}
+          </Text>
+        </View>
+      )}
     </TouchableOpacity>
   );
 };
 
-export default PlaylistCard;
+export default React.memo(PlaylistCard);

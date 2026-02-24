@@ -1,61 +1,51 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
+import { getCoverImage } from '../../utils/coverImages';
 import type { Album } from '../../types/api.types';
 
-interface AlbumCardProps {
+interface Props {
   album: Album;
-  onPress: () => void;
   size?: 'sm' | 'md';
+  onPress?: () => void;
 }
 
-const AlbumCard: React.FC<AlbumCardProps> = ({ album, onPress, size = 'md' }) => {
-  const subtitle = album.artista?.nombre
-    ? `Álbum · ${album.artista.nombre}`
-    : 'Álbum';
-
-  if (size === 'sm') {
-    return (
-      <TouchableOpacity
-        activeOpacity={0.7}
-        onPress={onPress}
-        className="flex-row items-center py-2 px-4"
-      >
-        <View className="w-14 h-14 bg-spotify-darker rounded items-center justify-center">
-          <Ionicons name="disc" size={24} color="#535353" />
-        </View>
-        <View className="flex-1 ml-3">
-          <Text className="text-spotify-white text-base font-semibold" numberOfLines={1}>
-            {album.titulo}
-          </Text>
-          <Text className="text-spotify-gray text-sm" numberOfLines={1}>
-            {subtitle}
-          </Text>
-        </View>
-      </TouchableOpacity>
-    );
-  }
+const AlbumCard: React.FC<Props> = ({ album, size = 'md', onPress }) => {
+  const isSm = size === 'sm';
+  const imgSize = isSm ? 56 : 140;
 
   return (
     <TouchableOpacity
       activeOpacity={0.7}
       onPress={onPress}
-      style={{ width: 150, marginRight: 12 }}
+      style={{ width: isSm ? undefined : imgSize }}
+      className={isSm ? 'flex-row items-center py-2 px-4' : 'mr-3'}
     >
-      <View
-        className="bg-spotify-darker items-center justify-center"
-        style={{ width: 150, height: 150, borderRadius: 4 }}
-      >
-        <Ionicons name="disc" size={48} color="#535353" />
-      </View>
-      <Text className="text-spotify-white text-sm font-bold mt-2" numberOfLines={2}>
-        {album.titulo}
-      </Text>
-      <Text className="text-spotify-gray text-xs mt-1" numberOfLines={1}>
-        {subtitle}
-      </Text>
+      <Image
+        source={getCoverImage(album.id, 'album')}
+        style={{ width: imgSize, height: imgSize, borderRadius: 4 }}
+        resizeMode="cover"
+      />
+      {isSm ? (
+        <View className="flex-1 ml-3">
+          <Text className="text-white text-base font-semibold" numberOfLines={1}>
+            {album.titulo}
+          </Text>
+          <Text className="text-spotify-gray text-sm" numberOfLines={1}>
+            {album.artista?.nombre ?? 'Álbum'}
+          </Text>
+        </View>
+      ) : (
+        <View className="mt-2">
+          <Text className="text-white text-sm font-semibold" numberOfLines={1}>
+            {album.titulo}
+          </Text>
+          <Text className="text-spotify-gray text-xs" numberOfLines={1}>
+            {album.artista?.nombre ?? 'Álbum'}
+          </Text>
+        </View>
+      )}
     </TouchableOpacity>
   );
 };
 
-export default AlbumCard;
+export default React.memo(AlbumCard);

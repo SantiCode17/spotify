@@ -1,5 +1,13 @@
-import React, { useState, useMemo } from 'react';
-import { View, Text, FlatList, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  Image,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -10,30 +18,47 @@ import { useFollowedAlbums } from '../../../src/hooks/useAlbums';
 import { useFollowedPodcasts } from '../../../src/hooks/usePodcasts';
 import { useFollowedPlaylists, useUserPlaylists } from '../../../src/hooks/usePlaylists';
 import { useSavedSongs } from '../../../src/hooks/useSongs';
+import * as storageService from '../../../src/services/storageService';
+import { getCoverImage } from '../../../src/utils/coverImages';
 
-import ArtistCard from '../../../src/components/cards/ArtistCard';
-import AlbumCard from '../../../src/components/cards/AlbumCard';
-import PodcastCard from '../../../src/components/cards/PodcastCard';
-import PlaylistCard from '../../../src/components/cards/PlaylistCard';
-import LibraryItemRow from '../../../src/components/library/LibraryItemRow';
 import EmptyState from '../../../src/components/ui/EmptyState';
 
 import type { Artista, Album, Podcast, Playlist } from '../../../src/types/api.types';
 
-type Tab = 'artistas' | 'albums' | 'podcasts' | 'listas';
+type Filter = 'todo' | 'playlists' | 'artistas' | 'albums' | 'podcasts';
 
-const TABS: { key: Tab; label: string }[] = [
+const FILTERS: { key: Filter; label: string }[] = [
+  { key: 'todo', label: 'Todo' },
+  { key: 'playlists', label: 'Playlists' },
   { key: 'artistas', label: 'Artistas' },
   { key: 'albums', label: 'Álbumes' },
   { key: 'podcasts', label: 'Podcasts' },
-  { key: 'listas', label: 'Listas' },
 ];
+
+type LibraryItem =
+  | { type: 'liked-songs'; count: number }
+  | { type: 'playlist'; data: Playlist }
+  | { type: 'artist'; data: Artista }
+  | { type: 'album'; data: Album }
+  | { type: 'podcast'; data: Podcast };
 
 const LibraryScreen = () => {
   const userId = useAuthStore((s) => s.userId);
-  const [activeTab, setActiveTab] = useState<Tab>('artistas');
+  const [activeFilter, setActiveFilter] = useState<Filter>('todo');
 
-  // Llamar TODOS los hooks al inicio (React hooks no pueden ser condicionales)
+  useEffect(() => {
+    storageService.getLibraryTab().then((tab) => {
+      if (tab && FILTERS.some((f) => f.key === tab)) {
+        setActiveFilter(tab as Filter);
+      }
+    });
+  }, []);
+
+  const handleFilterChange = useCallback((filter: Filter) => {
+    setActiveFilter(filter);
+    storageService.setLibraryTab(filter);
+  }, []);
+
   const followedArtists = useFollowedArtists(userId);
   const followedAlbums = useFollowedAlbums(userId);
   const followedPodcasts = useFollowedPodcasts(userId);
@@ -41,218 +66,269 @@ const LibraryScreen = () => {
   const userPlaylists = useUserPlaylists(userId);
   const savedSongs = useSavedSongs(userId);
 
-  // Fusionar playlists seguidas + propias para el tab Listas
   const allPlaylists = useMemo(() => {
     const followed = followedPlaylists.data ?? [];
     const own = userPlaylists.data ?? [];
-    // Deduplicar por id
     const map = new Map<number, Playlist>();
     own.forEach((p) => map.set(p.id, p));
-    followed.forEach((p) => { if (!map.has(p.id)) map.set(p.id, p); });
+    followed.forEach((p) => {
+      if (!map.has(p.id)) map.set(p.id, p);
+    });
     return Array.from(map.values());
   }, [followedPlaylists.data, userPlaylists.data]);
 
-  const isListasLoading =
-    followedPlaylists.isLoading || userPlaylists.isLoading || savedSongs.isLoading;
+  const isLoading =
+    followedArtists.isLoading ||
+    followedAlbums.isLoading ||
+    followedPodcasts.isLoading ||
+    followedPlaylists.isLoading ||
+    userPlaylists.isLoading ||
+    savedSongs.isLoading;
 
-  // ─── Renders por Tab ─────────────────────────────────────
-  const renderArtistas = () => {
-    if (followedArtists.isLoading) return <ActivityIndicator color="#1DB954" className="mt-8" />;
-    if (!followedArtists.data?.length) {
-      return (
-        <EmptyState
-          icon="people-outline"
-          title="No sigues a ningún artista"
-          subtitle="Explora y sigue a tus artistas favoritos"
-        />
-      );
-    }
-    return (
-      <FlatList
-        data={followedArtists.data}
-        keyExtractor={(item: Artista) => item.id.toString()}
-        renderItem={({ item }) => (
-          <ArtistCard
-            artist={item}
-            size="sm"
-            onPress={() => router.push(`/artist/${item.id}`)}
-          />
-        )}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 100 }}
-      />
-    );
-  };
+  // Construir lista unificada
+  const items = useMemo<LibraryItem[]>(() => {
+    const list: LibraryItem[] = [];
 
-  const renderAlbums = () => {
-    if (followedAlbums.isLoading) return <ActivityIndicator color="#1DB954" className="mt-8" />;
-    if (!followedAlbums.data?.length) {
-      return (
-        <EmptyState
-          icon="albums-outline"
-          title="No sigues ningún álbum"
-          subtitle="Descubre álbumes y síguelos"
-        />
-      );
+    if (activeFilter === 'todo' || activeFilter === 'playlists') {
+      list.push({ type: 'liked-songs', count: savedSongs.data?.length ?? 0 });
+      allPlaylists.forEach((p) => list.push({ type: 'playlist', data: p }));
     }
-    return (
-      <FlatList
-        data={followedAlbums.data}
-        keyExtractor={(item: Album) => item.id.toString()}
-        renderItem={({ item }) => (
-          <AlbumCard
-            album={item}
-            size="sm"
-            onPress={() => router.push(`/album/${item.id}`)}
-          />
-        )}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 100 }}
-      />
-    );
-  };
 
-  const renderPodcasts = () => {
-    if (followedPodcasts.isLoading) return <ActivityIndicator color="#1DB954" className="mt-8" />;
-    if (!followedPodcasts.data?.length) {
-      return (
-        <EmptyState
-          icon="mic-outline"
-          title="No sigues ningún podcast"
-          subtitle="Encuentra podcasts interesantes"
-        />
-      );
+    if (activeFilter === 'todo' || activeFilter === 'artistas') {
+      (followedArtists.data ?? []).forEach((a) => list.push({ type: 'artist', data: a }));
     }
-    return (
-      <FlatList
-        data={followedPodcasts.data}
-        keyExtractor={(item: Podcast) => item.id.toString()}
-        renderItem={({ item }) => (
-          <PodcastCard
-            podcast={item}
-            size="sm"
-            onPress={() => router.push(`/podcast/${item.id}`)}
-          />
-        )}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 100 }}
-      />
-    );
-  };
 
-  const renderListas = () => {
-    if (isListasLoading) return <ActivityIndicator color="#1DB954" className="mt-8" />;
-    if (!allPlaylists.length && !savedSongs.data?.length) {
-      return (
-        <EmptyState
-          icon="list-outline"
-          title="Crea tu primera playlist"
-          subtitle="Organiza tu música como quieras"
-          actionLabel="Crear playlist"
-          onAction={() => router.push('/modal/add-playlist')}
-        />
-      );
+    if (activeFilter === 'todo' || activeFilter === 'albums') {
+      (followedAlbums.data ?? []).forEach((a) => list.push({ type: 'album', data: a }));
     }
-    return (
-      <FlatList
-        data={allPlaylists}
-        keyExtractor={(item: Playlist) => item.id.toString()}
-        ListHeaderComponent={
-          <LibraryItemRow
-            icon="heart"
-            iconBgColor="#7B2FBE"
-            iconColor="#FFFFFF"
-            title="Canciones que te gustan"
-            subtitle={`${savedSongs.data?.length ?? 0} canciones`}
-            onPress={() => router.push('/playlist/liked')}
-          />
-        }
-        renderItem={({ item }) => (
-          <PlaylistCard
-            playlist={item}
-            size="sm"
-            onPress={() => router.push(`/playlist/${item.id}`)}
-          />
-        )}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 100 }}
-      />
-    );
-  };
 
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'artistas': return renderArtistas();
-      case 'albums': return renderAlbums();
-      case 'podcasts': return renderPodcasts();
-      case 'listas': return renderListas();
+    if (activeFilter === 'todo' || activeFilter === 'podcasts') {
+      (followedPodcasts.data ?? []).forEach((p) => list.push({ type: 'podcast', data: p }));
     }
-  };
+
+    return list;
+  }, [activeFilter, allPlaylists, followedArtists.data, followedAlbums.data, followedPodcasts.data, savedSongs.data]);
+
+  const renderItem = useCallback(
+    ({ item }: { item: LibraryItem }) => {
+      switch (item.type) {
+        case 'liked-songs':
+          return (
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => {}}
+              className="flex-row items-center py-2 px-4"
+            >
+              <View
+                className="items-center justify-center"
+                style={{
+                  width: 52,
+                  height: 52,
+                  borderRadius: 4,
+                  backgroundColor: '#6C3FC5',
+                }}
+              >
+                <Ionicons name="heart" size={22} color="#FFFFFF" />
+              </View>
+              <View className="flex-1 ml-3">
+                <Text className="text-white text-[15px] font-semibold" numberOfLines={1}>
+                  Canciones que te gustan
+                </Text>
+                <Text className="text-spotify-gray text-[13px] mt-0.5">
+                  Playlist · {item.count} canciones
+                </Text>
+              </View>
+            </TouchableOpacity>
+          );
+
+        case 'playlist':
+          return (
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => router.push(`/playlist/${item.data.id}`)}
+              className="flex-row items-center py-2 px-4"
+            >
+              <Image
+                source={getCoverImage(item.data.id, 'playlist')}
+                style={{ width: 52, height: 52, borderRadius: 4 }}
+                resizeMode="cover"
+              />
+              <View className="flex-1 ml-3">
+                <Text className="text-white text-[15px] font-semibold" numberOfLines={1}>
+                  {item.data.titulo}
+                </Text>
+                <Text className="text-spotify-gray text-[13px] mt-0.5" numberOfLines={1}>
+                  Playlist
+                  {item.data.usuario ? ` · ${item.data.usuario.username}` : ''}
+                  {item.data.numeroCanciones
+                    ? ` · ${item.data.numeroCanciones} canciones`
+                    : ''}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          );
+
+        case 'artist':
+          return (
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => router.push(`/artist/${item.data.id}`)}
+              className="flex-row items-center py-2 px-4"
+            >
+              <Image
+                source={getCoverImage(item.data.id, 'artist')}
+                style={{ width: 52, height: 52, borderRadius: 26 }}
+                resizeMode="cover"
+              />
+              <View className="flex-1 ml-3">
+                <Text className="text-white text-[15px] font-semibold" numberOfLines={1}>
+                  {item.data.nombre}
+                </Text>
+                <Text className="text-spotify-gray text-[13px] mt-0.5">Artista</Text>
+              </View>
+            </TouchableOpacity>
+          );
+
+        case 'album':
+          return (
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => router.push(`/album/${item.data.id}`)}
+              className="flex-row items-center py-2 px-4"
+            >
+              <Image
+                source={getCoverImage(item.data.id, 'album')}
+                style={{ width: 52, height: 52, borderRadius: 4 }}
+                resizeMode="cover"
+              />
+              <View className="flex-1 ml-3">
+                <Text className="text-white text-[15px] font-semibold" numberOfLines={1}>
+                  {item.data.titulo}
+                </Text>
+                <Text className="text-spotify-gray text-[13px] mt-0.5" numberOfLines={1}>
+                  Álbum{item.data.artista ? ` · ${item.data.artista.nombre}` : ''}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          );
+
+        case 'podcast':
+          return (
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => router.push(`/podcast/${item.data.id}`)}
+              className="flex-row items-center py-2 px-4"
+            >
+              <Image
+                source={getCoverImage(item.data.id, 'podcast')}
+                style={{ width: 52, height: 52, borderRadius: 8 }}
+                resizeMode="cover"
+              />
+              <View className="flex-1 ml-3">
+                <Text className="text-white text-[15px] font-semibold" numberOfLines={1}>
+                  {item.data.titulo}
+                </Text>
+                <Text className="text-spotify-gray text-[13px] mt-0.5">Podcast</Text>
+              </View>
+            </TouchableOpacity>
+          );
+      }
+    },
+    []
+  );
+
+  const keyExtractor = useCallback(
+    (item: LibraryItem, index: number) => {
+      switch (item.type) {
+        case 'liked-songs':
+          return 'liked-songs';
+        case 'playlist':
+          return `pl-${item.data.id}`;
+        case 'artist':
+          return `ar-${item.data.id}`;
+        case 'album':
+          return `al-${item.data.id}`;
+        case 'podcast':
+          return `po-${item.data.id}`;
+        default:
+          return `item-${index}`;
+      }
+    },
+    []
+  );
 
   return (
     <SafeAreaView className="flex-1 bg-spotify-black">
-      {/* ─── Header ─── */}
-      <View className="flex-row items-center px-4 pt-2 pb-3">
-        <Text className="text-spotify-white text-[28px] font-bold flex-1">
-          Tu biblioteca
-        </Text>
+      {/* Header */}
+      <View className="flex-row items-center px-4 pt-2 pb-1">
+        <Text className="text-white text-2xl font-bold flex-1">Tu biblioteca</Text>
         <TouchableOpacity
           activeOpacity={0.7}
-          onPress={() => router.push('/modal/add-playlist')}
-          style={{
-            width: 32,
-            height: 32,
-            borderRadius: 16,
-            borderWidth: 1.5,
-            borderColor: '#fff',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
+          onPress={() => router.push('/add-playlist')}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          className="w-8 h-8 items-center justify-center"
         >
-          <Ionicons name="add" size={20} color="#fff" />
+          <Ionicons name="add" size={26} color="#fff" />
         </TouchableOpacity>
       </View>
 
-      {/* ─── Selector Horizontal ─── */}
+      {/* Filter chips */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 16, gap: 8, paddingBottom: 8 }}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 8, gap: 8 }}
       >
-        {TABS.map((tab) => {
-          const isActive = activeTab === tab.key;
+        {FILTERS.map((f) => {
+          const active = activeFilter === f.key;
           return (
             <TouchableOpacity
-              key={tab.key}
+              key={f.key}
               activeOpacity={0.8}
-              onPress={() => setActiveTab(tab.key)}
+              onPress={() => handleFilterChange(f.key)}
               style={{
-                paddingHorizontal: 16,
-                paddingVertical: 8,
-                borderRadius: 20,
-                backgroundColor: isActive ? '#fff' : 'transparent',
-                borderWidth: isActive ? 0 : 1,
-                borderColor: '#fff',
+                paddingHorizontal: 14,
+                paddingVertical: 7,
+                borderRadius: 16,
+                backgroundColor: active ? '#1DB954' : '#232323',
               }}
             >
               <Text
                 style={{
-                  color: isActive ? '#000' : '#fff',
+                  color: active ? '#000' : '#fff',
+                  fontSize: 13,
                   fontWeight: '600',
-                  fontSize: 14,
                 }}
               >
-                {tab.label}
+                {f.label}
               </Text>
             </TouchableOpacity>
           );
         })}
       </ScrollView>
 
-      {/* ─── Contenido ─── */}
-      <View className="flex-1">
-        {renderContent()}
-      </View>
+      {/* Content */}
+      {isLoading ? (
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="large" color="#1DB954" />
+        </View>
+      ) : items.length === 0 ? (
+        <EmptyState
+          icon="library-outline"
+          title="Tu biblioteca está vacía"
+          subtitle="Busca artistas, álbumes o podcasts y síguelos"
+          actionLabel="Explorar"
+          onAction={() => router.push('/(app)/(tabs)/search')}
+        />
+      ) : (
+        <FlatList
+          data={items}
+          keyExtractor={keyExtractor}
+          renderItem={renderItem}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 100 }}
+          ItemSeparatorComponent={() => <View style={{ height: 2 }} />}
+        />
+      )}
     </SafeAreaView>
   );
 };

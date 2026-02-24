@@ -27,8 +27,13 @@ export const getEpisodeDetail = async (episodeId: number): Promise<Capitulo> => 
 
 /** Obtener podcasts seguidos por el usuario */
 export const getFollowedPodcasts = async (userId: number): Promise<Podcast[]> => {
-  const response = await apiClient.get(`/usuarios/${userId}/podcasts-seguidos`);
-  return response.data;
+  try {
+    const response = await apiClient.get(`/usuarios/${userId}/podcasts-seguidos`);
+    return response.data;
+  } catch (e: any) {
+    if (e.response?.status === 404) return [];
+    throw e;
+  }
 };
 
 /** Seguir podcast */
