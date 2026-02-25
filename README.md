@@ -409,7 +409,7 @@ La API REST de Symfony expone los siguientes controladores:
 
 ## 👤 Autor
 
-**Santiago Sánchez March** — 2º DAM · IES La Sénia  
+**Santiago Sánchez March** — 2º DAM · IES la Nuria
 Práctica de Programación Multimedia — Curso 2024/2025
 
 ---
