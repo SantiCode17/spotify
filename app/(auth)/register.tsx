@@ -114,7 +114,7 @@ const RegisterScreen = () => {
           showsVerticalScrollIndicator={false}
         >
           <View className="items-center px-8">
-            {/* ─── Logo ─── */}
+            {/* Logo */}
             <Image
               source={logo}
               style={{ width: 64, height: 64, marginBottom: 8 }}
@@ -127,7 +127,7 @@ const RegisterScreen = () => {
               Únete a Spotify gratis
             </Text>
 
-            {/* ─── Error global ─── */}
+            {/* Error global */}
             {error && (
               <View className="w-full bg-red-900/30 border border-red-500/40 rounded-lg px-4 py-3 mb-4 flex-row items-center">
                 <Ionicons name="alert-circle" size={18} color="#ef4444" />
@@ -138,7 +138,7 @@ const RegisterScreen = () => {
               </View>
             )}
 
-            {/* ─── Formulario ─── */}
+            {/* Formulario */}
             <View className="w-full">
               <SpotifyInput
                 label="Nombre de usuario"
@@ -208,7 +208,7 @@ const RegisterScreen = () => {
               />
             </View>
 
-            {/* ─── Botón Registro ─── */}
+            {/* Boton Registro */}
             <View className="w-full mt-2">
               <SpotifyButton
                 title="Crear Cuenta"
@@ -220,7 +220,7 @@ const RegisterScreen = () => {
               />
             </View>
 
-            {/* ─── Link a login ─── */}
+            {/* Enlace a login */}
             <View className="flex-row mt-8">
               <Text className="text-spotify-gray text-sm">¿Ya tienes cuenta? </Text>
               <Link href="/(auth)/login" asChild>

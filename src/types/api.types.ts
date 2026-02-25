@@ -1,6 +1,4 @@
-// ============================
 // Interfaces de respuesta de la API
-// ============================
 
 export interface Usuario {
   id: number;
@@ -19,7 +17,7 @@ export interface Playlist {
   usuario?: Pick<Usuario, 'id' | 'username' | 'email'>;
 }
 
-/** Respuesta de GET /usuarios/{userId}/playlists (wrapper con estado) */
+// Respuesta de GET /usuarios/{userId}/playlists (wrapper con estado)
 export interface UserPlaylistWrapper {
   playlist: Playlist;
   estado: string;
@@ -72,14 +70,14 @@ export interface CancionPlaylist {
   usuario?: Pick<Usuario, 'id' | 'username' | 'email'>;
 }
 
-// ─── Plan del usuario ────────────────────────────────────
+// Plan del usuario
 export interface Plan {
-  tipo: string;              // "free" | "premium"
-  fechaRevision?: string;    // para plan free
-  fechaRenovacion?: string;  // para plan premium
+  tipo: string;
+  fechaRevision?: string;
+  fechaRenovacion?: string;
 }
 
-// ─── Configuración del usuario ───────────────────────────
+// Configuracion del usuario
 export interface Configuracion {
   autoplay: boolean;
   ajuste: boolean;
@@ -89,7 +87,7 @@ export interface Configuracion {
   idioma: { nombre: string };
 }
 
-// ─── Pago ────────────────────────────────────────────────
+// Pago
 export interface Pago {
   numeroOrden: number;
   fecha: string; // ISO string

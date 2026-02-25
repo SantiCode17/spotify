@@ -9,11 +9,11 @@ interface SectionHeaderProps {
 
 const SectionHeader: React.FC<SectionHeaderProps> = ({ title, actionLabel, onAction }) => {
   return (
-    <View className="flex-row items-center justify-between px-4 py-3">
-      <Text className="text-spotify-white text-xl font-bold">{title}</Text>
+    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 14, paddingBottom: 12 }}>
+      <Text style={{ color: '#fff', fontSize: 22, fontWeight: '800' }}>{title}</Text>
       {actionLabel && onAction && (
         <TouchableOpacity activeOpacity={0.7} onPress={onAction}>
-          <Text className="text-spotify-green text-sm font-semibold">{actionLabel}</Text>
+          <Text style={{ color: '#A7A7A7', fontSize: 13, fontWeight: '600' }}>{actionLabel}</Text>
         </TouchableOpacity>
       )}
     </View>

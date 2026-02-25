@@ -37,12 +37,12 @@ const EpisodeDetailScreen = () => {
         contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Back */}
+        {/* Volver */}
         <TouchableOpacity onPress={() => router.back()} className="px-4 pt-2 pb-3">
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
 
-        {/* Hero */}
+        {/* Imagen principal */}
         <View className="items-center px-4 pb-4">
           <Image
             source={getCoverImage(episodeId, 'episode')}
@@ -54,7 +54,7 @@ const EpisodeDetailScreen = () => {
           </Text>
         </View>
 
-        {/* Meta */}
+        {/* Metadatos */}
         <View className="flex-row justify-center gap-4 pb-4">
           {episode.fecha && (
             <View className="flex-row items-center">

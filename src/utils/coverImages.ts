@@ -1,12 +1,9 @@
-/**
- * Sistema de portadas aleatorias.
- * Importa todas las imágenes de assets/portadas y asigna una de forma
- * determinista basándose en el id del elemento, para que siempre se
- * muestre la misma imagen para el mismo id.
- */
+// Sistema de portadas aleatorias deterministas.
+// Asigna una imagen a cada elemento segun su id y tipo,
+// para que siempre se muestre la misma portada para el mismo elemento.
 import { ImageSourcePropType } from 'react-native';
 
-// ── Importar TODAS las imágenes de assets/portadas ──
+// Imagenes de portada disponibles en assets/portadas
 const COVERS: ImageSourcePropType[] = [
   require('../../assets/portadas/Bad Bunny - EL ÚLTIMO TOUR DEL MUNDO (2020).jpeg'),
   require('../../assets/portadas/DAISY-Rusowsky.jpeg'),
@@ -42,11 +39,8 @@ const COVERS: ImageSourcePropType[] = [
   require('../../assets/portadas/🤑tuff.jpeg'),
 ];
 
-/**
- * Devuelve una portada determinista a partir de un id numérico y un tipo.
- * El tipo se usa como offset para que un álbum con id=5 y un artista con id=5
- * NO muestren la misma imagen.
- */
+// Devuelve una portada determinista segun id y tipo de contenido.
+// El offset por tipo evita que elementos distintos con el mismo id compartan imagen.
 type ContentType = 'album' | 'artist' | 'playlist' | 'podcast' | 'song' | 'episode' | 'user';
 
 const TYPE_OFFSET: Record<ContentType, number> = {

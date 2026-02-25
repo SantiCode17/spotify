@@ -58,12 +58,12 @@ const PodcastDetailScreen = () => {
 
   const renderHeader = () => (
     <View>
-      {/* Back */}
+      {/* Volver */}
       <TouchableOpacity onPress={() => router.back()} className="px-4 pt-2 pb-3">
         <Ionicons name="arrow-back" size={24} color="#fff" />
       </TouchableOpacity>
 
-      {/* Hero */}
+      {/* Portada y datos del podcast */}
       <View className="items-center px-4 pb-4">
         <Image
           source={getCoverImage(podcastId, 'podcast')}
@@ -83,7 +83,7 @@ const PodcastDetailScreen = () => {
         )}
       </View>
 
-      {/* Follow */}
+      {/* Seguir */}
       <View className="flex-row justify-center pb-4">
         <TouchableOpacity
           activeOpacity={0.7}
@@ -103,7 +103,7 @@ const PodcastDetailScreen = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Episodios header */}
+      {/* Cabecera de episodios */}
       <View className="px-4 py-2">
         <Text className="text-spotify-white text-xl font-bold">
           Episodios ({episodes?.length ?? 0})

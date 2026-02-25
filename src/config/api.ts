@@ -1,9 +1,10 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
-// ⚠️ Cambia esta IP por la de tu máquina local (puerto 8082 según docker-compose)
+// URL base de la API Symfony (puerto 8082 del docker-compose)
 export const BASE_URL = 'http://192.168.1.43:8082';
 
+// Cliente Axios configurado con la URL base y cabeceras JSON
 export const apiClient = axios.create({
   baseURL: BASE_URL,
   timeout: 10000,
@@ -13,7 +14,7 @@ export const apiClient = axios.create({
   },
 });
 
-// Interceptor de request: añade userId como header si está disponible
+// Interceptor de peticiones: adjunta el userId como cabecera si existe en SecureStore
 apiClient.interceptors.request.use(
   async (config) => {
     try {
@@ -22,14 +23,14 @@ apiClient.interceptors.request.use(
         config.headers['X-User-Id'] = userId;
       }
     } catch {
-      // SecureStore no disponible (web), ignorar
+      // En web SecureStore no esta disponible, se ignora
     }
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// Interceptor de response: maneja errores globalmente
+// Interceptor de respuestas: registra errores HTTP de forma legible
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {

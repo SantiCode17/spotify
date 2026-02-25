@@ -82,6 +82,14 @@ const AppLayout = () => {
         name="add-playlist"
         options={{ drawerItemStyle: { display: 'none' } }}
       />
+      <Drawer.Screen
+        name="liked-songs"
+        options={{ drawerItemStyle: { display: 'none' } }}
+      />
+      <Drawer.Screen
+        name="song/[id]"
+        options={{ drawerItemStyle: { display: 'none' } }}
+      />
     </Drawer>
   );
 };

@@ -15,6 +15,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { useDebounce } from '../../../src/hooks/useDebounce';
 import { useSearch } from '../../../src/hooks/useSearch';
 import { useRecentSearches } from '../../../src/hooks/useRecentSearches';
+import { useSavedSongs, useSaveSong, useUnsaveSong } from '../../../src/hooks/useSongs';
+import { useAuthStore } from '../../../src/store/authStore';
+import { usePlayerStore } from '../../../src/store/playerStore';
 
 import SectionHeader from '../../../src/components/SectionHeader';
 import ArtistCard from '../../../src/components/cards/ArtistCard';
@@ -43,10 +46,15 @@ const SearchScreen = () => {
 
   const debouncedQuery = useDebounce(searchQuery, 400);
   const { data, isLoading, isError } = useSearch(debouncedQuery);
+  const userId = useAuthStore((s) => s.userId);
+  const playSongFromQueue = usePlayerStore((s) => s.playSongFromQueue);
+  const { data: savedSongs } = useSavedSongs(userId ?? null);
+  const saveSong = useSaveSong(userId ?? null);
+  const unsaveSong = useUnsaveSong(userId ?? null);
   const { searches: recentSearches, add: addRecent, remove: removeRecent, clear: clearRecent } = useRecentSearches();
 
   React.useEffect(() => {
-    if (data && debouncedQuery.trim().length >= 2) {
+    if (data && debouncedQuery.trim().length >= 3) {
       const hasAny =
         data.artistas.length > 0 ||
         data.albums.length > 0 ||
@@ -57,7 +65,7 @@ const SearchScreen = () => {
     }
   }, [data, debouncedQuery]);
 
-  const isSearchActive = debouncedQuery.trim().length >= 2;
+  const isSearchActive = debouncedQuery.trim().length >= 3;
 
   const hasResults =
     data &&
@@ -80,28 +88,37 @@ const SearchScreen = () => {
   const renderRecentSearches = () => {
     if (recentSearches.length === 0) return null;
     return (
-      <View className="px-4 pt-4 pb-2">
-        <View className="flex-row items-center justify-between mb-3">
-          <Text className="text-white text-lg font-bold">Búsquedas recientes</Text>
+      <View style={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+          <Text style={{ color: '#fff', fontSize: 18, fontWeight: '700' }}>Búsquedas recientes</Text>
           <TouchableOpacity onPress={clearRecent}>
-            <Text className="text-spotify-gray text-sm">Borrar todo</Text>
+            <Text style={{ color: '#A7A7A7', fontSize: 13 }}>Borrar todo</Text>
           </TouchableOpacity>
         </View>
         {recentSearches.map((q) => (
           <TouchableOpacity
             key={q}
-            className="flex-row items-center py-2.5"
+            style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 10 }}
             activeOpacity={0.7}
             onPress={() => setSearchQuery(q)}
           >
-            <View className="w-10 h-10 rounded-full bg-spotify-darker items-center justify-center">
-              <Ionicons name="time-outline" size={20} color="#B3B3B3" />
+            <View
+              style={{
+                width: 42,
+                height: 42,
+                borderRadius: 21,
+                backgroundColor: '#2A2A2A',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Ionicons name="time-outline" size={20} color="#A7A7A7" />
             </View>
-            <Text className="text-white text-base ml-3 flex-1" numberOfLines={1}>{q}</Text>
+            <Text style={{ color: '#fff', fontSize: 15, marginLeft: 14, flex: 1 }} numberOfLines={1}>{q}</Text>
             <TouchableOpacity
               onPress={() => removeRecent(q)}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              className="p-2"
+              style={{ padding: 8 }}
             >
               <Ionicons name="close" size={18} color="#535353" />
             </TouchableOpacity>
@@ -112,17 +129,20 @@ const SearchScreen = () => {
   };
 
   const renderCategories = () => (
-    <View className="px-4 pt-4">
-      <Text className="text-white text-lg font-bold mb-3">Explorar categorías</Text>
-      <View className="flex-row flex-wrap justify-between">
+    <View style={{ paddingHorizontal: 16, paddingTop: 16 }}>
+      <Text style={{ color: '#fff', fontSize: 18, fontWeight: '700', marginBottom: 14 }}>
+        Explorar categorías
+      </Text>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
         {CATEGORIES.map((cat) => (
-          <View key={cat.name} style={{ width: '48%', marginBottom: 12 }}>
+          <View key={cat.name} style={{ width: '48%', marginBottom: 14 }}>
             <View
-              style={{ backgroundColor: cat.color, height: 100, borderRadius: 8 }}
-              className="justify-between p-3 overflow-hidden"
+              style={{ backgroundColor: cat.color, height: 104, borderRadius: 10, overflow: 'hidden' }}
             >
-              <Ionicons name={cat.icon} size={28} color="rgba(255,255,255,0.6)" style={{ alignSelf: 'flex-end' }} />
-              <Text className="text-white text-base font-bold">{cat.name}</Text>
+              <View style={{ flex: 1, justifyContent: 'space-between', padding: 14 }}>
+                <Ionicons name={cat.icon} size={30} color="rgba(255,255,255,0.5)" style={{ alignSelf: 'flex-end' }} />
+                <Text style={{ color: '#fff', fontSize: 16, fontWeight: '700' }}>{cat.name}</Text>
+              </View>
             </View>
           </View>
         ))}
@@ -190,13 +210,37 @@ const SearchScreen = () => {
         {data.canciones.length > 0 && (
           <View className="mt-4">
             <SectionHeader title="Canciones" />
-            {data.canciones.map((song) => (
-              <SongCard
-                key={`song-${song.id}`}
-                song={song}
-                onAddToPlaylist={() => handleAddToPlaylist(song.id)}
-              />
-            ))}
+                {data.canciones.map((song) => {
+                  const savedIds = new Set((savedSongs ?? []).map((s) => s.id));
+                  const isFavorite = savedIds.has(song.id);
+
+                  const handleAddPress = () => {
+                    if (!userId) {
+                      // redirigir a login si no hay usuario
+                      router.push('/login');
+                      return;
+                    }
+                    if (!isFavorite) {
+                      saveSong.mutate(song.id);
+                    } else {
+                      // si ya está guardada, abrimos modal para añadir a playlist
+                      handleAddToPlaylist(song.id);
+                    }
+                  };
+
+                  return (
+                    <SongCard
+                      key={`song-${song.id}`}
+                      song={song}
+                      onPress={() => {
+                        playSongFromQueue(song, data.canciones);
+                        router.push(`/song/${song.id}`);
+                      }}
+                      onAddToPlaylist={handleAddPress}
+                      isFavorite={isFavorite}
+                    />
+                  );
+                })}
           </View>
         )}
 
@@ -239,14 +283,24 @@ const SearchScreen = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-spotify-black">
-      <Text className="text-white text-[28px] font-bold px-4 pt-4 pb-2">Buscar</Text>
+      <Text style={{ color: '#fff', fontSize: 28, fontWeight: '800', paddingHorizontal: 16, paddingTop: 16, paddingBottom: 10 }}>
+        Buscar
+      </Text>
 
-      <View className="px-4 mb-2">
-        <View className="flex-row items-center bg-white rounded-lg px-3" style={{ height: 48 }}>
+      <View style={{ paddingHorizontal: 16, marginBottom: 8 }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: '#fff',
+            borderRadius: 10,
+            paddingHorizontal: 14,
+            height: 48,
+          }}
+        >
           <Ionicons name="search" size={20} color="#121212" />
           <TextInput
-            className="flex-1 ml-2 text-base"
-            style={{ color: '#121212', height: 48 }}
+            style={{ flex: 1, marginLeft: 10, color: '#121212', fontSize: 15, height: 48 }}
             placeholder="Artistas, canciones o podcasts"
             placeholderTextColor="#888"
             value={searchQuery}

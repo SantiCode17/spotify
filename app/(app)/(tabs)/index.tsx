@@ -1,14 +1,16 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, FlatList, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { DrawerActions, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { useAuthStore } from '../../../src/store/authStore';
+import { usePlayerStore } from '../../../src/store/playerStore';
 import { useFollowedPlaylists } from '../../../src/hooks/usePlaylists';
 import { useFollowedAlbums } from '../../../src/hooks/useAlbums';
 import { useSavedSongs } from '../../../src/hooks/useSongs';
+import { getCoverImage } from '../../../src/utils/coverImages';
 
 import SectionHeader from '../../../src/components/SectionHeader';
 import HorizontalList from '../../../src/components/lists/HorizontalList';
@@ -22,13 +24,14 @@ const HomeScreen = () => {
   const navigation = useNavigation();
   const user = useAuthStore((s) => s.user);
   const userId = useAuthStore((s) => s.userId);
+  const playSongFromQueue = usePlayerStore((s) => s.playSongFromQueue);
 
-  // ── Data hooks ──
+  // Hooks de datos
   const playlists = useFollowedPlaylists(userId);
   const albums = useFollowedAlbums(userId);
   const songs = useSavedSongs(userId);
 
-  // ── Saludo dinámico ──
+  // Saludo dinamico segun la hora del dia
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return { text: 'Buenos días', emoji: '☀️' };
@@ -38,39 +41,44 @@ const HomeScreen = () => {
 
   const greeting = getGreeting();
 
-  // ── Avatar con iniciales ──
-  const initials = user?.username
-    ? user.username.substring(0, 1).toUpperCase()
-    : '?';
-
-  // Limitar canciones a 10 para .map()
+  // Limitar canciones a 10 para la FlatList
   const displaySongs = songs.data?.slice(0, 10) ?? [];
 
   return (
     <SafeAreaView className="flex-1 bg-spotify-black">
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* ── Header con avatar + saludo ── */}
-        <View className="flex-row items-center px-4 pt-4 pb-2">
+        {/* Cabecera con avatar y saludo */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 }}>
           <TouchableOpacity
             activeOpacity={0.7}
             onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
-            className="w-10 h-10 bg-spotify-darker rounded-full items-center justify-center mr-3"
+            style={{
+              width: 38,
+              height: 38,
+              borderRadius: 19,
+              overflow: 'hidden',
+              marginRight: 14,
+            }}
           >
-            <Text className="text-spotify-white text-base font-bold">{initials}</Text>
+            <Image
+              source={getCoverImage(user?.id ?? 1, 'user')}
+              style={{ width: 38, height: 38, borderRadius: 19 }}
+              resizeMode="cover"
+            />
           </TouchableOpacity>
-          <View className="flex-1">
-            <Text className="text-spotify-white text-2xl font-bold">
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: '#fff', fontSize: 26, fontWeight: '800' }}>
               {greeting.text} {greeting.emoji}
             </Text>
           </View>
         </View>
 
-        {/* ── Sección 1: Playlists seguidas ── */}
-        <View className="mt-4">
+        {/* Seccion 1: Playlists seguidas */}
+        <View style={{ marginTop: 20 }}>
           <SectionHeader
             title="Tus Playlists"
             actionLabel="Ver todo"
-            onAction={() => router.push('/(app)/(tabs)/library')}
+            onAction={() => router.push({ pathname: '/(app)/(tabs)/library', params: { filter: 'playlists' } })}
           />
           <HorizontalList
             data={playlists.data}
@@ -91,12 +99,12 @@ const HomeScreen = () => {
           />
         </View>
 
-        {/* ── Sección 2: Álbumes seguidos ── */}
-        <View className="mt-6">
+        {/* Seccion 2: Albums seguidos */}
+        <View style={{ marginTop: 28 }}>
           <SectionHeader
             title="Tus Álbumes"
             actionLabel="Ver todo"
-            onAction={() => router.push('/(app)/(tabs)/library')}
+            onAction={() => router.push({ pathname: '/(app)/(tabs)/library', params: { filter: 'albums' } })}
           />
           <HorizontalList
             data={albums.data}
@@ -117,12 +125,12 @@ const HomeScreen = () => {
           />
         </View>
 
-        {/* ── Sección 3: Canciones guardadas (con .map) ── */}
-        <View className="mt-6 mb-8">
+        {/* Seccion 3: Canciones guardadas (FlatList vertical) */}
+        <View style={{ marginTop: 28, marginBottom: 32 }}>
           <SectionHeader
             title="Canciones Guardadas"
             actionLabel="Ver todo"
-            onAction={() => router.push('/(app)/(tabs)/library')}
+            onAction={() => router.push('/(app)/liked-songs')}
           />
 
           {songs.isLoading ? (
@@ -132,37 +140,43 @@ const HomeScreen = () => {
               ))}
             </View>
           ) : songs.isError ? (
-            <View className="items-center py-8">
-              <Ionicons name="cloud-offline-outline" size={32} color="#535353" />
-              <Text className="text-spotify-gray text-sm mt-2">Error al cargar canciones</Text>
-              <Text
-                onPress={() => songs.refetch()}
-                className="text-spotify-green text-sm font-semibold mt-2"
-              >
-                Reintentar
+            <View style={{ alignItems: 'center', paddingVertical: 32 }}>
+              <Ionicons name="cloud-offline-outline" size={36} color="#535353" />
+              <Text style={{ color: '#686868', fontSize: 14, marginTop: 8 }}>
+                Error al cargar canciones
               </Text>
+              <TouchableOpacity onPress={() => songs.refetch()} style={{ marginTop: 8 }}>
+                <Text style={{ color: '#1DB954', fontSize: 14, fontWeight: '600' }}>
+                  Reintentar
+                </Text>
+              </TouchableOpacity>
             </View>
           ) : displaySongs.length === 0 ? (
-            <View className="items-center py-8">
-              <Ionicons name="heart-outline" size={32} color="#535353" />
-              <Text className="text-spotify-gray text-sm mt-2">Sin canciones guardadas</Text>
-              <Text className="text-spotify-light-gray text-xs mt-1">
+            <View style={{ alignItems: 'center', paddingVertical: 32 }}>
+              <Ionicons name="heart-outline" size={36} color="#535353" />
+              <Text style={{ color: '#686868', fontSize: 14, marginTop: 8 }}>
+                Sin canciones guardadas
+              </Text>
+              <Text style={{ color: '#535353', fontSize: 12, marginTop: 4 }}>
                 Guarda canciones para verlas aquí
               </Text>
             </View>
           ) : (
-            displaySongs.map((song, index) => (
-              <View key={song.id}>
+            <FlatList
+              data={displaySongs}
+              keyExtractor={(song) => song.id.toString()}
+              scrollEnabled={false}
+              renderItem={({ item: song, index }) => (
                 <SongCard
                   song={song}
                   index={index + 1}
-                  onPress={() => {}}
+                  onPress={() => {
+                    playSongFromQueue(song, songs.data ?? []);
+                    router.push(`/song/${song.id}`);
+                  }}
                 />
-                {index < displaySongs.length - 1 && (
-                  <View className="h-px bg-spotify-darker mx-4" />
-                )}
-              </View>
-            ))
+              )}
+            />
           )}
         </View>
       </ScrollView>

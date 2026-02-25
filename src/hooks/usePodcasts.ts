@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '../config/queryKeys';
 import * as podcastService from '../services/podcastService';
 
-/** Podcasts seguidos por el usuario */
+// Podcasts seguidos por el usuario
 export const useFollowedPodcasts = (userId: number | null) => {
   return useQuery({
     queryKey: queryKeys.followedPodcasts(userId!),
@@ -11,7 +11,7 @@ export const useFollowedPodcasts = (userId: number | null) => {
   });
 };
 
-/** Detalle de un podcast */
+// Detalle de un podcast
 export const usePodcastDetail = (podcastId: number) => {
   return useQuery({
     queryKey: queryKeys.podcastDetail(podcastId),
@@ -20,7 +20,7 @@ export const usePodcastDetail = (podcastId: number) => {
   });
 };
 
-/** Capítulos/episodios de un podcast */
+// Capitulos de un podcast
 export const usePodcastEpisodes = (podcastId: number) => {
   return useQuery({
     queryKey: queryKeys.podcastEpisodes(podcastId),
@@ -29,7 +29,7 @@ export const usePodcastEpisodes = (podcastId: number) => {
   });
 };
 
-/** Detalle de un episodio/capítulo */
+// Detalle de un episodio
 export const useEpisodeDetail = (episodeId: number) => {
   return useQuery({
     queryKey: queryKeys.episodeDetail(episodeId),
@@ -38,7 +38,7 @@ export const useEpisodeDetail = (episodeId: number) => {
   });
 };
 
-/** Todos los podcasts */
+// Todos los podcasts
 export const useAllPodcasts = () => {
   return useQuery({
     queryKey: queryKeys.allPodcasts(),
@@ -46,7 +46,7 @@ export const useAllPodcasts = () => {
   });
 };
 
-/** Seguir podcast */
+// Seguir podcast
 export const useFollowPodcast = (userId: number | null) => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -57,7 +57,7 @@ export const useFollowPodcast = (userId: number | null) => {
   });
 };
 
-/** Dejar de seguir podcast */
+// Dejar de seguir podcast
 export const useUnfollowPodcast = (userId: number | null) => {
   const queryClient = useQueryClient();
   return useMutation({

@@ -152,7 +152,7 @@ const ConfigScreen = () => {
   return (
     <SafeAreaView className="flex-1 bg-spotify-black">
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
-        {/* Header */}
+        {/* Cabecera */}
         <View className="flex-row items-center px-4 pt-2 pb-4">
           <TouchableOpacity onPress={() => router.back()}>
             <Ionicons name="arrow-back" size={24} color="#fff" />
@@ -196,21 +196,21 @@ const ConfigScreen = () => {
         </View>
       </ScrollView>
 
-      {/* Picker Modal */}
+      {/* Modal de seleccion */}
       <Modal
         visible={activePicker !== null}
         animationType="slide"
         transparent
         onRequestClose={() => setActivePicker(null)}
       >
-        <Pressable
+        <View
           className="flex-1 bg-black/80 justify-end"
-          onPress={() => setActivePicker(null)}
         >
-          <Pressable
+          <Pressable className="flex-1" onPress={() => setActivePicker(null)} />
+
+          <View
             className="bg-spotify-dark"
             style={{ borderTopLeftRadius: 16, borderTopRightRadius: 16, maxHeight: '50%' }}
-            onPress={() => {}}
           >
             <View className="items-center pt-3 pb-1">
               <View className="w-10 h-1 bg-spotify-light-gray rounded-full" />
@@ -250,8 +250,8 @@ const ConfigScreen = () => {
             >
               <Text className="text-spotify-gray text-base font-semibold">Cancelar</Text>
             </TouchableOpacity>
-          </Pressable>
-        </Pressable>
+          </View>
+        </View>
       </Modal>
     </SafeAreaView>
   );

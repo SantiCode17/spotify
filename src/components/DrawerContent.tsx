@@ -35,7 +35,7 @@ const DrawerContent: React.FC<DrawerContentComponentProps> = (props) => {
       contentContainerStyle={{ flex: 1 }}
       style={{ backgroundColor: '#121212' }}
     >
-      {/* Header con info del usuario */}
+      {/* Cabecera con info del usuario */}
       <View className="px-5 py-6 border-b border-spotify-darker">
         <View className="w-16 h-16 rounded-full bg-spotify-darker items-center justify-center overflow-hidden mb-3">
           {user?.id ? (
@@ -56,7 +56,7 @@ const DrawerContent: React.FC<DrawerContentComponentProps> = (props) => {
         <Text className="text-spotify-gray text-sm mt-1">{user?.email || ''}</Text>
       </View>
 
-      {/* Menu items */}
+      {/* Opciones del menu */}
       <View className="flex-1 pt-4">
         {menuItems.map((item) => (
           <Pressable
@@ -79,7 +79,7 @@ const DrawerContent: React.FC<DrawerContentComponentProps> = (props) => {
         </Pressable>
       </View>
 
-      {/* Footer: Logout + Versión */}
+      {/* Pie: Cerrar sesion y version */}
       <View className="border-t border-spotify-darker px-5 py-4">
         <Pressable
           onPress={handleLogout}

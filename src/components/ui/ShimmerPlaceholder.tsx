@@ -7,7 +7,7 @@ interface ShimmerProps {
   borderRadius?: number;
 }
 
-/** Componente base con animación de opacidad pulsante */
+// Componente base con animacion de opacidad pulsante
 const Shimmer: React.FC<ShimmerProps> = ({ width, height, borderRadius = 8 }) => {
   const opacity = useRef(new Animated.Value(0.3)).current;
 
@@ -43,7 +43,7 @@ const Shimmer: React.FC<ShimmerProps> = ({ width, height, borderRadius = 8 }) =>
   );
 };
 
-/** Placeholder con forma de card horizontal (150×180) */
+// Placeholder con forma de card horizontal (150x180)
 export const ShimmerCard: React.FC = () => {
   return (
     <View style={{ width: 150, marginRight: 12 }}>
@@ -58,7 +58,7 @@ export const ShimmerCard: React.FC = () => {
   );
 };
 
-/** Placeholder con forma de fila (full-width × 72) */
+// Placeholder con forma de fila (ancho completo x 72)
 export const ShimmerRow: React.FC = () => {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 8 }}>

@@ -4,18 +4,17 @@ import { Platform } from 'react-native';
 import type { Usuario, LoginCredentials, RegisterData } from '../types/api.types';
 import * as authService from '../services/authService';
 
-// ─── Claves de almacenamiento ────────────────────────────────
+// Claves para almacenamiento seguro
 const STORE_KEY_USER = 'user_data';
 const STORE_KEY_USER_ID = 'user_id';
 
-// ─── Tipos del store ─────────────────────────────────────────
+// Tipado del estado de autenticación
 interface AuthState {
   user: Usuario | null;
   userId: number | null;
   isAuthenticated: boolean;
   isLoading: boolean;
 
-  // Acciones
   login: (credentials: LoginCredentials) => Promise<Usuario>;
   register: (data: RegisterData) => Promise<Usuario>;
   logout: () => Promise<void>;
@@ -23,7 +22,7 @@ interface AuthState {
   refreshUser: () => Promise<void>;
 }
 
-// ─── Helpers SecureStore (fallback web → localStorage) ───────
+// Funciones auxiliares para SecureStore con fallback a localStorage en web
 const secureSet = async (key: string, value: string) => {
   if (Platform.OS === 'web') {
     localStorage.setItem(key, value);
@@ -47,17 +46,14 @@ const secureDelete = async (key: string) => {
   }
 };
 
-// ─── Store ───────────────────────────────────────────────────
+// Store global de autenticación con Zustand
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   userId: null,
   isAuthenticated: false,
   isLoading: true,
 
-  /**
-   * Simula login: busca usuario por email en la API.
-   * Guarda datos en SecureStore para persistencia.
-   */
+  // Inicia sesión buscando el usuario por email y guarda en SecureStore
   login: async (credentials: LoginCredentials) => {
     const user = await authService.login(credentials);
     await secureSet(STORE_KEY_USER, JSON.stringify(user));
@@ -66,10 +62,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     return user;
   },
 
-  /**
-   * Registra un nuevo usuario con POST /usuarios.
-   * Auto-login tras registro exitoso.
-   */
+  // Registra un nuevo usuario y lo autentica automáticamente
   register: async (data: RegisterData) => {
     const user = await authService.register(data);
     await secureSet(STORE_KEY_USER, JSON.stringify(user));
@@ -78,19 +71,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     return user;
   },
 
-  /**
-   * Cierra sesión: limpia SecureStore y resetea estado.
-   */
+  // Cierra sesión eliminando los datos de SecureStore
   logout: async () => {
     await secureDelete(STORE_KEY_USER);
     await secureDelete(STORE_KEY_USER_ID);
     set({ user: null, userId: null, isAuthenticated: false });
   },
 
-  /**
-   * Inicializa la autenticación al arrancar la app.
-   * Lee datos persistidos de SecureStore.
-   */
+  // Recupera la sesión persistida al arrancar la aplicación
   initializeAuth: async () => {
     try {
       const userStr = await secureGet(STORE_KEY_USER);
@@ -109,17 +97,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
     } catch (error) {
       console.error('Error al inicializar autenticación:', error);
-      // Si hay error, limpiamos datos corruptos
       await secureDelete(STORE_KEY_USER);
       await secureDelete(STORE_KEY_USER_ID);
       set({ user: null, userId: null, isAuthenticated: false, isLoading: false });
     }
   },
 
-  /**
-   * Refresca los datos del usuario desde la API.
-   * Útil después de actualizar perfil/plan.
-   */
+  // Refresca los datos del usuario desde la API (útil tras editar perfil)
   refreshUser: async () => {
     const { userId } = get();
     if (!userId) return;

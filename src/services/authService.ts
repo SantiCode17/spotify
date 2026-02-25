@@ -1,43 +1,42 @@
 import apiClient from '../config/api';
 import type { Usuario, LoginCredentials, RegisterData } from '../types/api.types';
 
-/**
- * Obtiene la lista de todos los usuarios (usado para simular login)
- */
+// Obtiene la lista de todos los usuarios
 export const getUsuarios = async (): Promise<Usuario[]> => {
   const response = await apiClient.get('/usuarios');
   return response.data;
 };
 
-/**
- * Obtiene un usuario por ID
- */
+// Obtiene un usuario por su ID
 export const getUsuarioById = async (id: number): Promise<Usuario> => {
   const response = await apiClient.get(`/usuarios/${id}`);
   return response.data;
 };
 
-/**
- * Simula login: obtiene usuarios y busca coincidencia por email.
- * La API no devuelve el password (es write-only), así que solo
- * verificamos que el email exista. En producción habría JWT.
- */
+// Inicia sesion enviando email y password al endpoint POST /login
 export const login = async (credentials: LoginCredentials): Promise<Usuario> => {
-  const usuarios = await getUsuarios();
-  const user = usuarios.find(
-    (u: Usuario) => u.email.toLowerCase() === credentials.email.toLowerCase()
-  );
-  if (!user) {
-    throw new Error('No se encontró una cuenta con ese email');
+  try {
+    const response = await apiClient.post('/login', {
+      email: credentials.email,
+      password: credentials.password,
+    });
+    return response.data;
+  } catch (err: any) {
+    // Extraer mensaje legible de la respuesta de la API
+    if (err.response?.data?.error) {
+      throw new Error(err.response.data.error);
+    }
+    if (err.response?.status === 401) {
+      throw new Error('Contraseña incorrecta');
+    }
+    if (err.response?.status === 404) {
+      throw new Error('No se encontró una cuenta con ese email');
+    }
+    throw new Error('Error al iniciar sesión. Revisa tu conexión.');
   }
-  // No podemos verificar el password porque la API no lo devuelve
-  return user;
 };
 
-/**
- * Registra un nuevo usuario (POST /usuarios)
- * La API crea automáticamente plan Free + Configuración por defecto.
- */
+// Registra un nuevo usuario. La API crea plan Free y configuracion por defecto.
 export const register = async (data: RegisterData): Promise<Usuario> => {
   const response = await apiClient.post('/usuarios', {
     username: data.username,
@@ -48,9 +47,5 @@ export const register = async (data: RegisterData): Promise<Usuario> => {
   return response.data;
 };
 
-/**
- * Logout — solo limpia datos locales (no hay endpoint server)
- */
-export const logout = async (): Promise<void> => {
-  // El logout real se maneja en el store (limpiar SecureStore)
-};
+// Cierre de sesion (la limpieza real se hace en el store con SecureStore)
+export const logout = async (): Promise<void> => {};

@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '../config/queryKeys';
 import * as artistService from '../services/artistService';
 
-/** Artistas seguidos por el usuario */
+// Artistas seguidos por el usuario
 export const useFollowedArtists = (userId: number | null) => {
   return useQuery({
     queryKey: queryKeys.followedArtists(userId!),
@@ -11,7 +11,7 @@ export const useFollowedArtists = (userId: number | null) => {
   });
 };
 
-/** Detalle de un artista */
+// Detalle de un artista
 export const useArtistDetail = (artistId: number) => {
   return useQuery({
     queryKey: queryKeys.artistDetail(artistId),
@@ -20,7 +20,7 @@ export const useArtistDetail = (artistId: number) => {
   });
 };
 
-/** Álbumes de un artista */
+// Albums de un artista
 export const useArtistAlbums = (artistId: number) => {
   return useQuery({
     queryKey: queryKeys.artistAlbums(artistId),
@@ -29,7 +29,7 @@ export const useArtistAlbums = (artistId: number) => {
   });
 };
 
-/** Canciones de un artista */
+// Canciones de un artista
 export const useArtistSongs = (artistId: number) => {
   return useQuery({
     queryKey: queryKeys.artistSongs(artistId),
@@ -38,7 +38,7 @@ export const useArtistSongs = (artistId: number) => {
   });
 };
 
-/** Todos los artistas */
+// Todos los artistas
 export const useAllArtists = () => {
   return useQuery({
     queryKey: queryKeys.allArtists(),
@@ -46,7 +46,7 @@ export const useAllArtists = () => {
   });
 };
 
-/** Seguir artista */
+// Seguir artista
 export const useFollowArtist = (userId: number | null) => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -57,7 +57,7 @@ export const useFollowArtist = (userId: number | null) => {
   });
 };
 
-/** Dejar de seguir artista */
+// Dejar de seguir artista
 export const useUnfollowArtist = (userId: number | null) => {
   const queryClient = useQueryClient();
   return useMutation({

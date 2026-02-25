@@ -1,11 +1,6 @@
 import { useState, useEffect } from 'react';
 
-/**
- * Hook de debounce — retrasa la actualización de un valor
- * @param value - El valor a hacer debounce
- * @param delay - Delay en milisegundos (default: 300ms)
- * @returns El valor con debounce aplicado
- */
+// Hook de debounce que retrasa la actualizacion de un valor el tiempo indicado
 export const useDebounce = <T>(value: T, delay: number = 300): T => {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
 

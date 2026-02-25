@@ -11,14 +11,14 @@ interface Props {
 
 const ArtistCard: React.FC<Props> = ({ artist, size = 'md', onPress }) => {
   const isSm = size === 'sm';
-  const imgSize = isSm ? 56 : 140;
+  const imgSize = isSm ? 60 : 148;
 
   return (
     <TouchableOpacity
-      activeOpacity={0.7}
+      activeOpacity={0.65}
       onPress={onPress}
-      style={{ width: isSm ? undefined : imgSize }}
-      className={isSm ? 'flex-row items-center py-2 px-4' : 'mr-3 items-center'}
+      style={{ width: isSm ? undefined : imgSize, marginRight: isSm ? 0 : 14, alignItems: isSm ? undefined : 'center' }}
+      className={isSm ? 'flex-row items-center py-2 px-4' : ''}
     >
       <Image
         source={getCoverImage(artist.id, 'artist')}
@@ -26,18 +26,18 @@ const ArtistCard: React.FC<Props> = ({ artist, size = 'md', onPress }) => {
         resizeMode="cover"
       />
       {isSm ? (
-        <View className="flex-1 ml-3">
-          <Text className="text-white text-base font-semibold" numberOfLines={1}>
+        <View style={{ flex: 1, marginLeft: 14 }}>
+          <Text style={{ color: '#fff', fontSize: 15, fontWeight: '600' }} numberOfLines={1}>
             {artist.nombre}
           </Text>
-          <Text className="text-spotify-gray text-sm">Artista</Text>
+          <Text style={{ color: '#A7A7A7', fontSize: 13, marginTop: 2 }}>Artista</Text>
         </View>
       ) : (
-        <View className="mt-2 items-center">
-          <Text className="text-white text-sm font-semibold text-center" numberOfLines={2}>
+        <View style={{ marginTop: 10, alignItems: 'center' }}>
+          <Text style={{ color: '#fff', fontSize: 14, fontWeight: '600', textAlign: 'center' }} numberOfLines={2}>
             {artist.nombre}
           </Text>
-          <Text className="text-spotify-gray text-xs">Artista</Text>
+          <Text style={{ color: '#A7A7A7', fontSize: 12, marginTop: 2 }}>Artista</Text>
         </View>
       )}
     </TouchableOpacity>

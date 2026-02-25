@@ -3,11 +3,11 @@ import { View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 interface SpotifyImageProps {
-  /** Tipo de contenido para elegir icono */
+  // Tipo de contenido para elegir el icono adecuado
   type: 'artist' | 'album' | 'playlist' | 'podcast' | 'song' | 'episode' | 'user';
-  /** Tamaño en px (ancho = alto) */
+  // Tamaño en pixeles (ancho = alto)
   size?: number;
-  /** Redondo (para artistas / usuario) */
+  // Si es redondo (para artistas y usuario)
   rounded?: boolean;
 }
 
@@ -21,11 +21,8 @@ const ICON_MAP: Record<SpotifyImageProps['type'], keyof typeof Ionicons.glyphMap
   user: 'person',
 };
 
-/**
- * Componente placeholder de imagen.
- * La API no sirve imágenes, así que mostramos un icono
- * sobre un fondo oscuro con la forma adecuada.
- */
+// Componente placeholder de imagen.
+// La API no sirve imagenes, se muestra un icono sobre fondo oscuro.
 const SpotifyImage: React.FC<SpotifyImageProps> = ({
   type,
   size = 150,

@@ -3,8 +3,10 @@ import { useLocalSearchParams, router } from 'expo-router';
 import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 
 import { useAuthStore } from '../../../src/store/authStore';
+import { usePlayerStore } from '../../../src/store/playerStore';
 import {
   useArtistDetail,
   useArtistAlbums,
@@ -25,6 +27,7 @@ const ArtistDetailScreen = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
   const artistId = Number(id);
   const userId = useAuthStore((s) => s.userId);
+  const playSongFromQueue = usePlayerStore((s) => s.playSongFromQueue);
 
   const { data: artist, isLoading, isError, refetch } = useArtistDetail(artistId);
   const { data: albums, isLoading: albumsLoading } = useArtistAlbums(artistId);
@@ -63,40 +66,91 @@ const ArtistDetailScreen = () => {
   // Usamos FlatList con canciones como data principal y albums en header
   const renderHeader = () => (
     <View>
-      {/* Back */}
-      <TouchableOpacity onPress={() => router.back()} className="px-4 pt-2 pb-3">
-        <Ionicons name="arrow-back" size={24} color="#fff" />
-      </TouchableOpacity>
+      <LinearGradient colors={['#1a3a2a', '#15291f', '#121212']} style={{ paddingBottom: 24 }}>
+        {/* Volver */}
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={{ paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12 }}
+        >
+          <Ionicons name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
 
-      {/* Hero */}
-      <View className="items-center px-4 pb-4">
-        <Image
-          source={getCoverImage(artistId, 'artist')}
-          style={{ width: 192, height: 192, borderRadius: 96, marginBottom: 16 }}
-          resizeMode="cover"
-        />
-        <Text className="text-spotify-white text-2xl font-bold text-center">
-          {artist.nombre}
-        </Text>
-      </View>
+        {/* Portada y nombre del artista */}
+        <View style={{ alignItems: 'center', paddingHorizontal: 20 }}>
+          <View style={{
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 10 },
+            shadowOpacity: 0.5,
+            shadowRadius: 20,
+            elevation: 16,
+          }}>
+            <Image
+              source={getCoverImage(artistId, 'artist')}
+              style={{ width: 200, height: 200, borderRadius: 100 }}
+              resizeMode="cover"
+            />
+          </View>
+          <Text
+            style={{ color: '#fff', fontSize: 26, fontWeight: '800', textAlign: 'center', marginTop: 20 }}
+          >
+            {artist.nombre}
+          </Text>
+        </View>
+      </LinearGradient>
 
-      {/* Follow */}
-      <View className="flex-row justify-center pb-4">
+      {/* Seguir y reproducir */}
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'center',
+          alignItems: 'center',
+          paddingVertical: 16,
+          paddingHorizontal: 20,
+        }}
+      >
         <TouchableOpacity
           activeOpacity={0.7}
           onPress={toggleFollow}
           disabled={followMutation.isPending || unfollowMutation.isPending}
-          className={`px-6 py-2 rounded-full border ${
-            isFollowed ? 'border-spotify-green' : 'border-spotify-light-gray'
-          }`}
+          style={{
+            paddingHorizontal: 28,
+            paddingVertical: 10,
+            borderRadius: 24,
+            borderWidth: 1.5,
+            borderColor: isFollowed ? '#1DB954' : '#535353',
+          }}
         >
           <Text
-            className={`text-sm font-bold ${
-              isFollowed ? 'text-spotify-green' : 'text-spotify-white'
-            }`}
+            style={{
+              fontSize: 14,
+              fontWeight: '700',
+              color: isFollowed ? '#1DB954' : '#fff',
+            }}
           >
             {isFollowed ? 'Siguiendo' : 'Seguir'}
           </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() => {
+            if (songs && songs.length > 0) {
+              const shuffled = [...songs].sort(() => Math.random() - 0.5);
+              playSongFromQueue(shuffled[0], shuffled);
+              router.push(`/song/${shuffled[0].id}`);
+            }
+          }}
+          style={{
+            width: 52,
+            height: 52,
+            borderRadius: 26,
+            backgroundColor: '#1DB954',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginLeft: 'auto',
+          }}
+        >
+          <Ionicons name="shuffle" size={26} color="#000" />
         </TouchableOpacity>
       </View>
 
@@ -113,14 +167,21 @@ const ArtistDetailScreen = () => {
         emptyTitle="Sin álbumes"
       />
 
-      {/* Canciones header */}
+      {/* Cabecera de canciones */}
       <SectionHeader title="Canciones populares" />
-      {songsLoading && <ActivityIndicator color="#1DB954" className="mt-2" />}
+      {songsLoading && <ActivityIndicator color="#1DB954" style={{ marginTop: 8 }} />}
     </View>
   );
 
   const renderSong = ({ item, index }: { item: Cancion; index: number }) => (
-    <SongCard song={item} index={index + 1} />
+    <SongCard
+      song={item}
+      index={index + 1}
+      onPress={() => {
+        playSongFromQueue(item, songs ?? []);
+        router.push(`/song/${item.id}`);
+      }}
+    />
   );
 
   return (

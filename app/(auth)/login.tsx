@@ -66,7 +66,7 @@ const LoginScreen = () => {
           showsVerticalScrollIndicator={false}
         >
           <View className="items-center px-8">
-            {/* ─── Logo ─── */}
+            {/* Logo */}
             <Image
               source={logo}
               style={{ width: 80, height: 80, marginBottom: 12 }}
@@ -79,7 +79,7 @@ const LoginScreen = () => {
               Inicia sesión para continuar
             </Text>
 
-            {/* ─── Error global ─── */}
+            {/* Error global */}
             {error && (
               <View className="w-full bg-red-900/30 border border-red-500/40 rounded-lg px-4 py-3 mb-4 flex-row items-center">
                 <Ionicons name="alert-circle" size={18} color="#ef4444" />
@@ -90,7 +90,7 @@ const LoginScreen = () => {
               </View>
             )}
 
-            {/* ─── Formulario ─── */}
+            {/* Formulario */}
             <View className="w-full">
               <SpotifyInput
                 label="Email"
@@ -131,7 +131,7 @@ const LoginScreen = () => {
               />
             </View>
 
-            {/* ─── Botón Login ─── */}
+            {/* Boton Login */}
             <View className="w-full mt-2">
               <SpotifyButton
                 title="Iniciar Sesión"
@@ -143,7 +143,7 @@ const LoginScreen = () => {
               />
             </View>
 
-            {/* ─── Link a registro ─── */}
+            {/* Enlace a registro */}
             <View className="flex-row mt-8">
               <Text className="text-spotify-gray text-sm">¿No tienes cuenta? </Text>
               <Link href="/(auth)/register" asChild>

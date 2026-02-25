@@ -3,7 +3,7 @@ import { queryKeys } from '../config/queryKeys';
 import * as userService from '../services/userService';
 import type { Usuario } from '../types/api.types';
 
-/** Datos del usuario */
+// Datos del usuario
 export const useUser = (userId: number | null) => {
   return useQuery({
     queryKey: queryKeys.user(userId!),
@@ -12,7 +12,7 @@ export const useUser = (userId: number | null) => {
   });
 };
 
-/** Plan del usuario */
+// Plan del usuario
 export const useUserPlan = (userId: number | null) => {
   return useQuery({
     queryKey: queryKeys.userPlan(userId!),
@@ -21,7 +21,7 @@ export const useUserPlan = (userId: number | null) => {
   });
 };
 
-/** Configuración del usuario */
+// Configuracion del usuario
 export const useUserConfig = (userId: number | null) => {
   return useQuery({
     queryKey: queryKeys.userConfig(userId!),
@@ -30,7 +30,7 @@ export const useUserConfig = (userId: number | null) => {
   });
 };
 
-/** Actualizar configuración */
+// Actualizar configuracion
 export const useUpdateUserConfig = (userId: number | null) => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -41,7 +41,7 @@ export const useUpdateUserConfig = (userId: number | null) => {
   });
 };
 
-/** Actualizar perfil */
+// Actualizar perfil
 export const useUpdateUser = (userId: number | null) => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -52,7 +52,7 @@ export const useUpdateUser = (userId: number | null) => {
   });
 };
 
-/** Pagos del usuario */
+// Pagos del usuario
 export const useUserPayments = (userId: number | null) => {
   return useQuery({
     queryKey: queryKeys.userPayments(userId!),
@@ -61,7 +61,7 @@ export const useUserPayments = (userId: number | null) => {
   });
 };
 
-/** Activar premium */
+// Activar premium
 export const useActivatePremium = (userId: number | null) => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -75,7 +75,7 @@ export const useActivatePremium = (userId: number | null) => {
   });
 };
 
-/** Cancelar premium (volver a Free) */
+// Cancelar premium y volver a Free
 export const useCancelPremium = (userId: number | null) => {
   const queryClient = useQueryClient();
   return useMutation({

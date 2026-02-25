@@ -1,6 +1,7 @@
 import apiClient from '../config/api';
 import type { Cancion, Artista, Album, Playlist, Podcast } from '../types/api.types';
 
+// Tipado de resultados de busqueda agrupados por categoria
 export interface SearchResults {
   canciones: Cancion[];
   artistas: Artista[];
@@ -9,10 +10,8 @@ export interface SearchResults {
   podcasts: Podcast[];
 }
 
-/**
- * Búsqueda global — obtiene todos los recursos y filtra en cliente
- * (La API no tiene endpoint de búsqueda unificado)
- */
+// Busqueda global: obtiene todos los recursos y filtra en cliente
+// (la API no tiene endpoint de busqueda unificado)
 export const searchAll = async (query: string): Promise<SearchResults> => {
   const q = query.toLowerCase();
 

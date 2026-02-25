@@ -9,8 +9,10 @@ import {
   ActivityIndicator,
   Pressable,
   Image,
+  Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { useAuthStore } from '../../store/authStore';
@@ -26,6 +28,8 @@ interface AddToPlaylistModalProps {
   onClose: () => void;
 }
 
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+
 const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({
   visible,
   songId,
@@ -40,11 +44,15 @@ const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({
       playlistService.addSongToPlaylist(playlistId, songId!, userId!),
     onSuccess: (_data, playlistId) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.playlistSongs(playlistId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.playlistDetail(playlistId) });
       Alert.alert('¡Listo!', 'Canción añadida a la playlist');
       onClose();
     },
-    onError: () => {
-      Alert.alert('Error', 'No se pudo añadir la canción');
+    onError: (error: any) => {
+      const msg = error?.response?.status === 409
+        ? 'Esta canción ya está en la playlist'
+        : 'No se pudo añadir la canción';
+      Alert.alert('Error', msg);
     },
   });
 
@@ -55,24 +63,43 @@ const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({
 
   const renderPlaylistItem = ({ item }: { item: Playlist }) => (
     <TouchableOpacity
-      activeOpacity={0.7}
+      activeOpacity={0.6}
       onPress={() => handleSelectPlaylist(item)}
-      className="flex-row items-center py-3 px-4"
       disabled={addSongMutation.isPending}
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 12,
+        paddingHorizontal: 24,
+      }}
     >
-      <View className="w-12 h-12 rounded items-center justify-center overflow-hidden">
+      <View
+        style={{
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.3,
+          shadowRadius: 6,
+          elevation: 6,
+        }}
+      >
         <Image
           source={getCoverImage(item.id, 'playlist')}
-          style={{ width: 48, height: 48, borderRadius: 4 }}
+          style={{ width: 56, height: 56, borderRadius: 8 }}
           resizeMode="cover"
         />
       </View>
-      <View className="flex-1 ml-3">
-        <Text className="text-spotify-white text-base font-semibold" numberOfLines={1}>
+      <View style={{ flex: 1, marginLeft: 16 }}>
+        <Text
+          style={{ color: '#fff', fontSize: 16, fontWeight: '700' }}
+          numberOfLines={1}
+        >
           {item.titulo}
         </Text>
-        <Text className="text-spotify-gray text-sm">Tu playlist</Text>
+        <Text style={{ color: '#A7A7A7', fontSize: 13, marginTop: 3 }}>
+          {item.numeroCanciones ?? 0} canciones
+        </Text>
       </View>
+      <Ionicons name="add-circle-outline" size={24} color="#1DB954" />
     </TouchableOpacity>
   );
 
@@ -83,61 +110,129 @@ const AddToPlaylistModal: React.FC<AddToPlaylistModalProps> = ({
       transparent
       onRequestClose={onClose}
     >
-      {/* Fondo oscuro — cierra al pulsar fuera */}
-      <Pressable
-        className="flex-1 bg-black/80 justify-end"
-        onPress={onClose}
-      >
-        {/* Panel inferior */}
-        <Pressable
-          className="bg-spotify-dark max-h-[70%]"
-          style={{ borderTopLeftRadius: 16, borderTopRightRadius: 16 }}
-          onPress={() => {}} // evita que el press se propague al fondo
-        >
-          {/* Handle / Título */}
-          <View className="items-center pt-3 pb-1">
-            <View className="w-10 h-1 bg-spotify-light-gray rounded-full" />
-          </View>
-          <Text className="text-spotify-white text-lg font-bold text-center py-3">
-            Añadir a playlist
-          </Text>
+      <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.75)', justifyContent: 'flex-end' }}>
+        {/* Zona superior: al tocar cierra el modal */}
+        <Pressable style={{ flex: 1 }} onPress={onClose} />
 
-          {/* Contenido */}
-          {isLoading ? (
-            <View className="items-center py-10">
-              <ActivityIndicator size="large" color="#1DB954" />
-              <Text className="text-spotify-gray text-sm mt-2">Cargando playlists…</Text>
+        {/* Contenedor del modal */}
+        <View
+          style={{
+            maxHeight: SCREEN_HEIGHT * 0.72,
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+            overflow: 'hidden',
+          }}
+        >
+          <LinearGradient colors={['#2A2A2A', '#1A1A1A', '#121212']}>
+            {/* Indicador */}
+            <View style={{ alignItems: 'center', paddingTop: 12, paddingBottom: 4 }}>
+              <View
+                style={{
+                  width: 40,
+                  height: 4,
+                  backgroundColor: '#535353',
+                  borderRadius: 2,
+                }}
+              />
             </View>
-          ) : !playlists || playlists.length === 0 ? (
-            <View className="items-center py-10 px-4">
-              <Ionicons name="musical-notes-outline" size={40} color="#535353" />
-              <Text className="text-spotify-gray text-sm mt-2">No tienes playlists</Text>
-              <Text className="text-spotify-light-gray text-xs mt-1">
-                Crea una playlist primero
+
+            {/* Titulo */}
+            <View style={{ paddingVertical: 16, paddingHorizontal: 24 }}>
+              <Text
+                style={{
+                  color: '#fff',
+                  fontSize: 20,
+                  fontWeight: '800',
+                  textAlign: 'center',
+                }}
+              >
+                Añadir a playlist
+              </Text>
+              <Text
+                style={{
+                  color: '#A7A7A7',
+                  fontSize: 13,
+                  textAlign: 'center',
+                  marginTop: 4,
+                }}
+              >
+                Selecciona la playlist donde quieres añadirla
               </Text>
             </View>
-          ) : (
-            <FlatList
-              data={playlists}
-              renderItem={renderPlaylistItem}
-              keyExtractor={(p) => p.id.toString()}
-              showsVerticalScrollIndicator={false}
-              ItemSeparatorComponent={() => (
-                <View className="h-px bg-spotify-darker mx-4" />
-              )}
-            />
-          )}
 
-          {/* Botón Cancelar */}
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={onClose}
-            className="py-4 items-center border-t border-spotify-darker"
-          >
-            <Text className="text-red-500 text-base font-semibold">Cancelar</Text>
-          </TouchableOpacity>
-        </Pressable>
-      </Pressable>
+            {/* Separador */}
+            <View style={{ height: 1, backgroundColor: '#333', marginHorizontal: 24 }} />
+
+            {/* Contenido */}
+            {isLoading ? (
+              <View style={{ alignItems: 'center', paddingVertical: 48 }}>
+                <ActivityIndicator size="large" color="#1DB954" />
+                <Text style={{ color: '#686868', fontSize: 14, marginTop: 12 }}>
+                  Cargando playlists…
+                </Text>
+              </View>
+            ) : !playlists || playlists.length === 0 ? (
+              <View style={{ alignItems: 'center', paddingVertical: 48, paddingHorizontal: 24 }}>
+                <View
+                  style={{
+                    width: 72,
+                    height: 72,
+                    borderRadius: 36,
+                    backgroundColor: '#252525',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: 16,
+                  }}
+                >
+                  <Ionicons name="musical-notes-outline" size={36} color="#535353" />
+                </View>
+                <Text style={{ color: '#fff', fontSize: 17, fontWeight: '700' }}>
+                  No tienes playlists
+                </Text>
+                <Text
+                  style={{
+                    color: '#A7A7A7',
+                    fontSize: 13,
+                    marginTop: 6,
+                    textAlign: 'center',
+                  }}
+                >
+                  Crea una playlist primero para poder añadir canciones
+                </Text>
+              </View>
+            ) : (
+              <FlatList
+                data={playlists}
+                renderItem={renderPlaylistItem}
+                keyExtractor={(p) => p.id.toString()}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingVertical: 8 }}
+                style={{ maxHeight: SCREEN_HEIGHT * 0.4 }}
+                ItemSeparatorComponent={() => (
+                  <View style={{ height: 1, backgroundColor: '#1E1E1E', marginHorizontal: 24 }} />
+                )}
+              />
+            )}
+
+            {/* Boton cancelar */}
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={onClose}
+              style={{
+                paddingVertical: 16,
+                alignItems: 'center',
+                borderTopWidth: 1,
+                borderTopColor: '#333',
+                marginBottom: 8,
+              }}
+            >
+              <Text style={{ color: '#B3B3B3', fontSize: 15, fontWeight: '600' }}>
+                Cancelar
+              </Text>
+            </TouchableOpacity>
+          </LinearGradient>
+        </View>
+      </View>
     </Modal>
   );
 };

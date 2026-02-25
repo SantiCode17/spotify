@@ -97,7 +97,7 @@ const SubscriptionsScreen = () => {
   return (
     <SafeAreaView className="flex-1 bg-spotify-black">
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
-        {/* Header */}
+        {/* Cabecera */}
         <View className="flex-row items-center px-4 pt-2 pb-4">
           <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
             <Ionicons name="arrow-back" size={24} color="#fff" />
@@ -105,7 +105,7 @@ const SubscriptionsScreen = () => {
           <Text className="text-white text-xl font-bold ml-4">Suscripción</Text>
         </View>
 
-        {/* Plan card */}
+        {/* Tarjeta del plan */}
         <View className="mx-4 rounded-2xl overflow-hidden mb-6">
           <LinearGradient
             colors={isPremium ? ['#7B2FBE', '#4B1A72'] : ['#333', '#1a1a1a']}
@@ -175,7 +175,7 @@ const SubscriptionsScreen = () => {
           </LinearGradient>
         </View>
 
-        {/* Premium features */}
+        {/* Ventajas Premium */}
         {!isPremium && (
           <View className="mx-4 mb-6">
             <Text className="text-white text-lg font-bold mb-3">¿Por qué Premium?</Text>

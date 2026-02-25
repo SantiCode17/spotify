@@ -11,35 +11,35 @@ interface Props {
 
 const AlbumCard: React.FC<Props> = ({ album, size = 'md', onPress }) => {
   const isSm = size === 'sm';
-  const imgSize = isSm ? 56 : 140;
+  const imgSize = isSm ? 60 : 148;
 
   return (
     <TouchableOpacity
-      activeOpacity={0.7}
+      activeOpacity={0.65}
       onPress={onPress}
-      style={{ width: isSm ? undefined : imgSize }}
-      className={isSm ? 'flex-row items-center py-2 px-4' : 'mr-3'}
+      style={{ width: isSm ? undefined : imgSize, marginRight: isSm ? 0 : 14 }}
+      className={isSm ? 'flex-row items-center py-2 px-4' : ''}
     >
       <Image
         source={getCoverImage(album.id, 'album')}
-        style={{ width: imgSize, height: imgSize, borderRadius: 4 }}
+        style={{ width: imgSize, height: imgSize, borderRadius: isSm ? 8 : 6 }}
         resizeMode="cover"
       />
       {isSm ? (
-        <View className="flex-1 ml-3">
-          <Text className="text-white text-base font-semibold" numberOfLines={1}>
+        <View style={{ flex: 1, marginLeft: 14 }}>
+          <Text style={{ color: '#fff', fontSize: 15, fontWeight: '600' }} numberOfLines={1}>
             {album.titulo}
           </Text>
-          <Text className="text-spotify-gray text-sm" numberOfLines={1}>
+          <Text style={{ color: '#A7A7A7', fontSize: 13, marginTop: 2 }} numberOfLines={1}>
             {album.artista?.nombre ?? 'Álbum'}
           </Text>
         </View>
       ) : (
-        <View className="mt-2">
-          <Text className="text-white text-sm font-semibold" numberOfLines={1}>
+        <View style={{ marginTop: 10 }}>
+          <Text style={{ color: '#fff', fontSize: 14, fontWeight: '600' }} numberOfLines={1}>
             {album.titulo}
           </Text>
-          <Text className="text-spotify-gray text-xs" numberOfLines={1}>
+          <Text style={{ color: '#A7A7A7', fontSize: 12, marginTop: 2 }} numberOfLines={1}>
             {album.artista?.nombre ?? 'Álbum'}
           </Text>
         </View>

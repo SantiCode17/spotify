@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '../config/queryKeys';
 import * as songService from '../services/songService';
 
-/** Canciones guardadas (liked songs) del usuario */
+// Canciones guardadas (liked songs) del usuario
 export const useSavedSongs = (userId: number | null) => {
   return useQuery({
     queryKey: queryKeys.savedSongs(userId!),
@@ -11,7 +11,7 @@ export const useSavedSongs = (userId: number | null) => {
   });
 };
 
-/** Detalle de una canción */
+// Detalle de una cancion
 export const useSongDetail = (songId: number) => {
   return useQuery({
     queryKey: queryKeys.songDetail(songId),
@@ -20,7 +20,7 @@ export const useSongDetail = (songId: number) => {
   });
 };
 
-/** Todas las canciones */
+// Todas las canciones
 export const useAllSongs = () => {
   return useQuery({
     queryKey: queryKeys.allSongs(),
@@ -28,7 +28,7 @@ export const useAllSongs = () => {
   });
 };
 
-/** Guardar canción (like) */
+// Guardar cancion como favorita
 export const useSaveSong = (userId: number | null) => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -39,7 +39,7 @@ export const useSaveSong = (userId: number | null) => {
   });
 };
 
-/** Quitar canción guardada (unlike) */
+// Quitar cancion de favoritas
 export const useUnsaveSong = (userId: number | null) => {
   const queryClient = useQueryClient();
   return useMutation({

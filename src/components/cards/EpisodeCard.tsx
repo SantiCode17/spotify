@@ -31,7 +31,7 @@ const EpisodeCard: React.FC<Props> = ({ episode, onPress }) => {
           {episode.duracion ? ` · ${formatDurationMin(episode.duracion)}` : ''}
         </Text>
       </View>
-      <Ionicons name="play-circle-outline" size={28} color="#1DB954" />
+      <Ionicons name="play-circle-outline" size={32} color="#1DB954" style={{ marginLeft: 12 }} />
     </TouchableOpacity>
   );
 };
